@@ -6,10 +6,15 @@ class Dashboardwidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       children: [
-        SizedBox(height: 18),
-        HeaderWidget(),
+        Container(
+          height: 13,
+        ),
+        const HeaderWidget(),
+        Container(
+          height: 13,
+        ),
       ],
     );   
   }

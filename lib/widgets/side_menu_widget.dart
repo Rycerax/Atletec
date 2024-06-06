@@ -25,6 +25,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   Widget buildMenuEntry(SideMenuData data, int index){
     final isSelected = selectedIndex == index;
     return Container(
+      height: 47,
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(
           Radius.circular(5.0),
