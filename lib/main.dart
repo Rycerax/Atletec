@@ -1,9 +1,16 @@
 import 'package:atletec/const/constant.dart';
+import 'package:atletec/provider/manager.dart';
 import 'package:atletec/screens/main_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => Manager(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
