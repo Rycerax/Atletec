@@ -1,11 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
-class HeaderWidget extends StatelessWidget {
+class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key});
 
+  @override
+  State<HeaderWidget> createState() => _HeaderWidgetState();
+}
+
+class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     return Row(crossAxisAlignment: CrossAxisAlignment.start,
