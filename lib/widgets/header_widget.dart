@@ -27,12 +27,10 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           child: Container(
             padding: const EdgeInsets.only(right: 5),
             child: DropdownMenu<dynamic>(
-              expandedInsets: EdgeInsets.zero,
               onSelected: (value) {
-                st.initSerialPort(value);
-                st.readData();
-                st.readData();
+                st.selectPort(value);
               },
+              expandedInsets: EdgeInsets.zero,
               label: const Text('Select COM Port'),
               dropdownMenuEntries: st.ports.map((String port) {
                 return DropdownMenuEntry<dynamic>(

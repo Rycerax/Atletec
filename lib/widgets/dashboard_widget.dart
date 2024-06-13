@@ -1,4 +1,5 @@
 import 'package:atletec/widgets/header_widget.dart';
+import 'package:atletec/widgets/serial_data_plotter.dart';
 import 'package:flutter/material.dart';
 
 class Dashboardwidget extends StatelessWidget {
@@ -15,6 +16,7 @@ class Dashboardwidget extends StatelessWidget {
         Container(
           height: 13,
         ),
+        const SerialDataPlotter()
       ],
     );   
   }
