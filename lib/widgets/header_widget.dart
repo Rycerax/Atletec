@@ -21,36 +21,21 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
-    return Row(crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(right: 5),
-            child: DropdownMenu<dynamic>(
-              onSelected: (value) {
-                st.selectPort(value);
-              },
-              expandedInsets: EdgeInsets.zero,
-              label: const Text('Select COM Port'),
-              dropdownMenuEntries: st.ports.map((String port) {
-                return DropdownMenuEntry<dynamic>(
-                  value: port,
-                  label: port,
-                );
-              }).toList(),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5),
-            child: const DropdownMenu(
-              expandedInsets: EdgeInsets.zero,
-              label: Text('Select Field'),
-              dropdownMenuEntries: [],
-            ),
-          ),
-        ),
+        st.sport == 'Soccer'
+            ? Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  child: const DropdownMenu(
+                    expandedInsets: EdgeInsets.zero,
+                    label: Text('Select Field'),
+                    dropdownMenuEntries: [],
+                  ),
+                ),
+              )
+            : const SizedBox(),
         Expanded(
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 10),
@@ -72,6 +57,6 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           ),
         ),
       ],
-    );    
+    );
   }
 }

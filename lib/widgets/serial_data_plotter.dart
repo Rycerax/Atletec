@@ -7,14 +7,16 @@ import 'package:provider/provider.dart';
 
 class SerialDataPlotter extends StatefulWidget {
   const SerialDataPlotter({super.key});
-
   @override
   State<SerialDataPlotter> createState() => _SerialDataPlotterState();
 }
 
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
-  final port = SerialPort('COM5');
+  final port = SerialPort('COM4');
+  int initIndex = 14;
+  double yRange = 8000;
+  String func = 'Accel';
   SerialPortReader? reader;
   final _accelxPoints = <FlSpot>[];
   final _accelyPoints = <FlSpot>[];
@@ -24,7 +26,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void initState() {
     super.initState();
-    for(var i = 0; i < 10; ++i){
+    for (var i = 0; i < 10; ++i) {
       setState(() {
         _accelxPoints.add(FlSpot(_counter.toDouble(), 0.0));
         _accelyPoints.add(FlSpot(_counter.toDouble(), 0.0));
@@ -35,7 +37,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     _initPort();
   }
 
-  void _initPort(){
+  void _initPort() {
     try {
       port.openRead();
       port.config = SerialPortConfig()
@@ -44,73 +46,91 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
         ..stopBits = 1
         ..parity = SerialPortParity.none
         ..setFlowControl(SerialPortFlowControl.none);
-        setState(() {
-          reader = SerialPortReader(port);
-        });
-    } catch(error){
+      setState(() {
+        reader = SerialPortReader(port);
+      });
+    } catch (error) {
       print(error);
     }
   }
 
-  List<int> _parseData(List<int> buff){
+  List<int> _parseData(List<int> buff) {
     List<int> res = [];
-    for(var i = 0; i < buff.length-1; i++){
-      if(buff.elementAt(i) == 0x7d && buff.elementAt(i+1) == 0x5e){
+    for (var i = 0; i < buff.length - 1; i++) {
+      if (buff.elementAt(i) == 0x7d && buff.elementAt(i + 1) == 0x5e) {
         res.add(0x7e);
         i++;
-      }
-      else if(buff.elementAt(i) == 0x7d && buff.elementAt(i+1) == 0x5d){
+      } else if (buff.elementAt(i) == 0x7d && buff.elementAt(i + 1) == 0x5d) {
         res.add(0x7d);
         i++;
-      }
-      else{
+      } else {
         res.add(buff.elementAt(i));
       }
     }
     return res;
   }
 
-  int bytesToInt(int byte1, int byte2){
+  int bytesToInt(int byte1, int byte2) {
     int val = (byte1 << 8) | byte2;
 
-    if(val > 0x7FFF){
+    if (val > 0x7FFF) {
       val -= 0x10000;
     }
     return val;
   }
 
-  void _startFetchingData () {
+  void _startFetchingData(BuildContext context) {
     List<int> buffer = [];
     List<int> test = [];
     reader!.stream.listen((data) {
-      for(var byte in data){
+      for (var byte in data) {
         buffer.add(byte);
-        if(byte == 0x7e){
+        if (byte == 0x7e) {
           buffer = _parseData(buffer);
-          print("Length: ${buffer.length}");
-          print(buffer);
-          for(var i = 14; i < buffer.length-4; i += 12){
-            test.add(bytesToInt(buffer.elementAt(i), buffer.elementAt(i+1)));
-            setState(() {
-              _accelxPoints.add(FlSpot(_counter.toDouble(), bytesToInt(buffer.elementAt(i), buffer.elementAt(i+1)).toDouble()));
-              _accelyPoints.add(FlSpot(_counter.toDouble(), bytesToInt(buffer.elementAt(i+2), buffer.elementAt(i+3)).toDouble()));
-              _accelzPoints.add(FlSpot(_counter.toDouble(), bytesToInt(buffer.elementAt(i+4), buffer.elementAt(i+5)).toDouble()));
-              _counter++;
-            });
-          }
-          print('ok');
-          setState(() {
-            while(_accelxPoints.length > 100){
+          if (buffer.length < 1) continue;
+          print(buffer.elementAt(1));
+          if (buffer.elementAt(1) == 3) {
+            print('Ok');
+            Provider.of<Manager>(context, listen: false)
+                .updateBattery(buffer.elementAt(8));
+            buffer = [];
+            print('Ok');
+          } else if (buffer.elementAt(1) == 1) {
+            print("Length: ${buffer.length}");
+            print(buffer);
+            while (_accelxPoints.length > 125) {
               _accelxPoints.removeAt(0);
               _accelyPoints.removeAt(0);
               _accelzPoints.removeAt(0);
             }
-          });
-          print(test);
-          // buffer = _parseData(buffer);
-          // print('Received: $buffer');
-          test = [];
-          buffer = [];
+            for (var i = initIndex; i < buffer.length - 4; i += 12) {
+              test.add(
+                  bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1)));
+              setState(() {
+                _accelxPoints.add(FlSpot(
+                    _counter.toDouble(),
+                    bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1))
+                        .toDouble()));
+                _accelyPoints.add(FlSpot(
+                    _counter.toDouble(),
+                    bytesToInt(buffer.elementAt(i + 2), buffer.elementAt(i + 3))
+                        .toDouble()));
+                _accelzPoints.add(FlSpot(
+                    _counter.toDouble(),
+                    bytesToInt(buffer.elementAt(i + 4), buffer.elementAt(i + 5))
+                        .toDouble()));
+                _counter++;
+              });
+            }
+            print('ok');
+            print(test);
+            // buffer = _parseData(buffer);
+            // print('Received: $buffer');
+            test = [];
+            buffer = [];
+          } else if (buffer.elementAt(1) == 2) {
+            print('GEO: $buffer');
+          }
         }
       }
     });
@@ -164,79 +184,118 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
-    return
-     Column(
+    return Column(
       children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            RadioMenuButton(
+                value: 'Accel',
+                groupValue: func,
+                onChanged: (val) {
+                  setState(() {
+                    func = val.toString();
+                    initIndex = 14;
+                    yRange = 8000;
+                  });
+                },
+                style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                    elevation: const WidgetStatePropertyAll(5)),
+                child: const Text('Accelerometer')),
+            RadioMenuButton(
+                value: 'Gyro',
+                groupValue: func,
+                onChanged: (val) {
+                  setState(() {
+                    func = val.toString();
+                    initIndex = 8;
+                    yRange = 32000;
+                  });
+                },
+                style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                    elevation: const WidgetStatePropertyAll(5)),
+                child: const Text('Gyroscope')),
+            RadioMenuButton(
+                value: 'Heat',
+                groupValue: func,
+                onChanged: (val) {
+                  setState(() {
+                    func = val.toString();
+                  });
+                },
+                style: ButtonStyle(
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10))),
+                    elevation: const WidgetStatePropertyAll(5)),
+                child: const Text('Heat Map')),
+          ],
+        ),
         AspectRatio(
-          aspectRatio: 1.9,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: LineChart(
-              LineChartData(
-                minY: -8000,
-                maxY: 8000,
-                minX: _accelzPoints.first.x,
-                maxX: _accelzPoints.last.x,
-                lineTouchData: const LineTouchData(enabled: false),
-                clipData: const FlClipData.all(),
-                gridData: const FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                ),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: _accelxPoints,
-                    isCurved: true,
-                    barWidth: 2,
-                    color: Colors.red,
-                    belowBarData: BarAreaData(show: false),
-                    dotData: const FlDotData(show: false)
+            aspectRatio: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: LineChart(
+                LineChartData(
+                  minY: -yRange,
+                  maxY: yRange,
+                  minX: _accelzPoints.first.x,
+                  maxX: _accelzPoints.last.x,
+                  lineTouchData: const LineTouchData(enabled: false),
+                  clipData: const FlClipData.all(),
+                  gridData: const FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
                   ),
-                  LineChartBarData(
-                    spots: _accelyPoints,
-                    isCurved: true,
-                    barWidth: 2,
-                    color: Colors.green,
-                    belowBarData: BarAreaData(show: false),
-                    dotData: const FlDotData(show: false)
-                  ),
-                  LineChartBarData(
-                    spots: _accelzPoints,
-                    isCurved: true,
-                    barWidth: 2,
-                    color: Colors.blue,
-                    belowBarData: BarAreaData(show: false),
-                    dotData: const FlDotData(show: false)
-                  )
-                ],
-                titlesData: const FlTitlesData(
-                  show: true,
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)
-                  ),
-                  topTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false)
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                        spots: _accelxPoints,
+                        isCurved: true,
+                        barWidth: 2,
+                        color: Colors.red,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: const FlDotData(show: false)),
+                    LineChartBarData(
+                        spots: _accelyPoints,
+                        isCurved: true,
+                        barWidth: 2,
+                        color: Colors.green,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: const FlDotData(show: false)),
+                    LineChartBarData(
+                        spots: _accelzPoints,
+                        isCurved: true,
+                        barWidth: 2,
+                        color: Colors.blue,
+                        belowBarData: BarAreaData(show: false),
+                        dotData: const FlDotData(show: false))
+                  ],
+                  titlesData: const FlTitlesData(
+                    show: true,
+                    rightTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles:
+                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles:
+                          SideTitles(showTitles: true, reservedSize: 40),
                     ),
                   ),
                 ),
               ),
-            ),
-          )
-        ),
+            )),
         Center(
           child: IconButton(
-            icon: const Icon(Icons.book),
+            icon: const Icon(Icons.play_arrow),
             onPressed: () {
-              _startFetchingData();
+              _startFetchingData(context);
             },
           ),
         )
