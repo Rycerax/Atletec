@@ -13,11 +13,15 @@ class SerialDataPlotter extends StatefulWidget {
 
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
-  final port = SerialPort('COM4');
+  SerialPort? port;
   int initIndex = 14;
   double yRange = 8000;
+  List<int> buffer = [];
   String func = 'Accel';
   SerialPortReader? reader;
+  bool playing = false;
+  StreamSubscription<List<int>>? subscription;
+  Stream<List<int>>? broadcastStream;
   final _accelxPoints = <FlSpot>[];
   final _accelyPoints = <FlSpot>[];
   final _accelzPoints = <FlSpot>[];
@@ -26,31 +30,31 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void initState() {
     super.initState();
-    for (var i = 0; i < 10; ++i) {
+    resetData();
+  }
+
+  void resetData() {
+    for (var i = 0; i < 500; ++i) {
       setState(() {
         _accelxPoints.add(FlSpot(_counter.toDouble(), 0.0));
+        if (_accelxPoints.length > 500) _accelxPoints.removeAt(0);
         _accelyPoints.add(FlSpot(_counter.toDouble(), 0.0));
+        if (_accelyPoints.length > 500) _accelyPoints.removeAt(0);
         _accelzPoints.add(FlSpot(_counter.toDouble(), 0.0));
+        if (_accelzPoints.length > 500) _accelzPoints.removeAt(0);
         _counter++;
       });
     }
-    _initPort();
   }
 
-  void _initPort() {
-    try {
-      port.openRead();
-      port.config = SerialPortConfig()
-        ..baudRate = 115200
-        ..bits = 8
-        ..stopBits = 1
-        ..parity = SerialPortParity.none
-        ..setFlowControl(SerialPortFlowControl.none);
-      setState(() {
-        reader = SerialPortReader(port);
-      });
-    } catch (error) {
-      print(error);
+  void _initPort(BuildContext context) {
+    port = SerialPort('COM4');
+    if (port!.openReadWrite()) {
+      reader = SerialPortReader(port!);
+      broadcastStream = reader!.stream.asBroadcastStream();
+      _startListening(context);
+    } else {
+      print('Failed to open port!');
     }
   }
 
@@ -79,61 +83,88 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return val;
   }
 
-  void _startFetchingData(BuildContext context) {
-    List<int> buffer = [];
-    List<int> test = [];
-    reader!.stream.listen((data) {
-      for (var byte in data) {
-        buffer.add(byte);
-        if (byte == 0x7e) {
-          buffer = _parseData(buffer);
-          if (buffer.length < 1) continue;
-          print(buffer.elementAt(1));
-          if (buffer.elementAt(1) == 3) {
-            print('Ok');
-            Provider.of<Manager>(context, listen: false)
-                .updateBattery(buffer.elementAt(8));
-            buffer = [];
-            print('Ok');
-          } else if (buffer.elementAt(1) == 1) {
-            print("Length: ${buffer.length}");
-            print(buffer);
-            while (_accelxPoints.length > 125) {
-              _accelxPoints.removeAt(0);
-              _accelyPoints.removeAt(0);
-              _accelzPoints.removeAt(0);
+  void _stopListening() {
+    subscription?.cancel();
+    subscription = null;
+    resetData();
+
+    if (port != null && port!.isOpen) {
+      port!.close();
+      print('Serial port closed!');
+    }
+  }
+
+  void _startListening(BuildContext context) {
+    print("OK3");
+    if (broadcastStream == null) {
+      print('Broadcast Stream is null!');
+      return;
+    }
+
+    subscription = broadcastStream!.listen(
+      (data) {
+        print("OK3");
+        for (var byte in data) {
+          buffer.add(byte);
+          if (byte == 0x7e) {
+            buffer = _parseData(buffer);
+            if (buffer.isEmpty) continue;
+            print(buffer.elementAt(1));
+            if (buffer.elementAt(1) == 3) {
+              print('Ok');
+              Provider.of<Manager>(context, listen: false)
+                  .updateBattery(buffer.elementAt(8));
+              buffer = [];
+              print('Ok');
+            } else if (buffer.elementAt(1) == 1) {
+              print("Length: ${buffer.length}");
+              print(buffer);
+              while (_accelxPoints.length > 500) {
+                _accelxPoints.removeAt(0);
+                _accelyPoints.removeAt(0);
+                _accelzPoints.removeAt(0);
+              }
+              for (var i = initIndex; i < buffer.length - 4; i += 12) {
+                setState(() {
+                  _accelxPoints.add(FlSpot(
+                      _counter.toDouble(),
+                      bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1))
+                          .toDouble()));
+                  _accelyPoints.add(FlSpot(
+                      _counter.toDouble(),
+                      bytesToInt(
+                              buffer.elementAt(i + 2), buffer.elementAt(i + 3))
+                          .toDouble()));
+                  _accelzPoints.add(FlSpot(
+                      _counter.toDouble(),
+                      bytesToInt(
+                              buffer.elementAt(i + 4), buffer.elementAt(i + 5))
+                          .toDouble()));
+                  _counter++;
+                });
+              }
+              print('ok');
+              // buffer = _parseData(buffer);
+              // print('Received: $buffer');
+              buffer = [];
+            } else if (buffer.elementAt(1) == 2) {
+              print('GEO: $buffer');
             }
-            for (var i = initIndex; i < buffer.length - 4; i += 12) {
-              test.add(
-                  bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1)));
-              setState(() {
-                _accelxPoints.add(FlSpot(
-                    _counter.toDouble(),
-                    bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1))
-                        .toDouble()));
-                _accelyPoints.add(FlSpot(
-                    _counter.toDouble(),
-                    bytesToInt(buffer.elementAt(i + 2), buffer.elementAt(i + 3))
-                        .toDouble()));
-                _accelzPoints.add(FlSpot(
-                    _counter.toDouble(),
-                    bytesToInt(buffer.elementAt(i + 4), buffer.elementAt(i + 5))
-                        .toDouble()));
-                _counter++;
-              });
-            }
-            print('ok');
-            print(test);
-            // buffer = _parseData(buffer);
-            // print('Received: $buffer');
-            test = [];
-            buffer = [];
-          } else if (buffer.elementAt(1) == 2) {
-            print('GEO: $buffer');
           }
         }
-      }
-    });
+      },
+      onError: (error) {
+        print("Ok error!");
+        print('Error: $error');
+        _stopListening();
+      },
+      onDone: () {
+        print('Stream closed!');
+        _stopListening();
+      },
+      cancelOnError: true,
+    );
+    print("OK4");
     // _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
     //   final response = await http.get(Uri.parse('http://127.0.0.1:5000/data'));
     //   if(response.statusCode == 200){
@@ -176,8 +207,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void dispose() {
     _timer?.cancel();
-    port.close();
     reader!.close();
+    _stopListening();
     super.dispose();
   }
 
@@ -219,19 +250,21 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                         borderRadius: BorderRadius.circular(10))),
                     elevation: const WidgetStatePropertyAll(5)),
                 child: const Text('Gyroscope')),
-            RadioMenuButton(
-                value: 'Heat',
-                groupValue: func,
-                onChanged: (val) {
-                  setState(() {
-                    func = val.toString();
-                  });
-                },
-                style: ButtonStyle(
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10))),
-                    elevation: const WidgetStatePropertyAll(5)),
-                child: const Text('Heat Map')),
+            st.sport == 'Soccer'
+                ? RadioMenuButton(
+                    value: 'Heat',
+                    groupValue: func,
+                    onChanged: (val) {
+                      setState(() {
+                        func = val.toString();
+                      });
+                    },
+                    style: ButtonStyle(
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                        elevation: const WidgetStatePropertyAll(5)),
+                    child: const Text('Heat Map'))
+                : const SizedBox(),
           ],
         ),
         AspectRatio(
@@ -242,8 +275,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 LineChartData(
                   minY: -yRange,
                   maxY: yRange,
-                  minX: _accelzPoints.first.x,
-                  maxX: _accelzPoints.last.x,
+                  minX: _accelxPoints.first.x + 20,
+                  maxX: _accelxPoints.last.x,
                   lineTouchData: const LineTouchData(enabled: false),
                   clipData: const FlClipData.all(),
                   gridData: const FlGridData(
@@ -293,9 +326,19 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
             )),
         Center(
           child: IconButton(
-            icon: const Icon(Icons.play_arrow),
+            iconSize: 35,
+            icon: playing
+                ? const Icon(Icons.stop_circle_rounded)
+                : const Icon(Icons.play_circle_filled_rounded),
             onPressed: () {
-              _startFetchingData(context);
+              if (playing) {
+                _stopListening();
+              } else {
+                _initPort(context);
+              }
+              setState(() {
+                playing = !playing;
+              });
             },
           ),
         )

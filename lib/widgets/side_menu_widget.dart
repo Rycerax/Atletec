@@ -12,7 +12,7 @@ class SideMenuWidget extends StatefulWidget {
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  int selectedIndex = 0;
+  int selectedIndex = -1;
   final sports = ['Soccer', 'Jump System', 'Surf'];
 
   @override
@@ -43,24 +43,26 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           ),
         ),
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+        st.battery == 0
+            ? const SizedBox()
+            : Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    const Icon(Icons.battery_4_bar),
-                    const SizedBox(width: 10),
-                    Text('${st.battery == 0 ? '' : '${st.battery}%'}'),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.battery_4_bar),
+                          const SizedBox(width: 10),
+                          Text('${st.battery}%'),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        )
+              )
       ],
     );
   }
