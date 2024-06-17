@@ -12,7 +12,6 @@ class SideMenuWidget extends StatefulWidget {
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  int selectedIndex = -1;
   final sports = ['Soccer', 'Jump System', 'Surf'];
 
   @override
@@ -68,20 +67,19 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   }
 
   Widget buildMenuEntry(SideMenuData data, int index) {
-    final isSelected = selectedIndex == index;
     return Container(
       height: 47,
-      decoration: BoxDecoration(
-        borderRadius: const BorderRadius.all(
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(
           Radius.circular(5.0),
         ),
-        color: isSelected ? selectionColor : Colors.transparent,
+        color: Colors.transparent,
       ),
       margin: const EdgeInsets.symmetric(vertical: 3),
       child: InkWell(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         onTap: () => setState(() {
-          selectedIndex = index;
+          print(data.menu[index].title);
         }),
         child: Row(
           children: [
@@ -89,15 +87,15 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
               child: Icon(
                 data.menu[index].icon,
-                color: isSelected ? Colors.black : Colors.grey,
+                color: Colors.grey,
               ),
             ),
             Text(
               data.menu[index].title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
-                color: isSelected ? Colors.black : Colors.grey,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                color: Colors.grey,
+                fontWeight: FontWeight.normal,
               ),
             )
           ],

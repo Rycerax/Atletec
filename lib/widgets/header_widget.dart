@@ -24,6 +24,18 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.only(right: 5, left: 10),
+            child: TextFormField(
+              decoration: const InputDecoration(
+                labelText: 'Game Description',
+                prefixIcon: Icon(Icons.sports_score),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+        ),
         st.sport == 'Soccer'
             ? Expanded(
                 child: Container(

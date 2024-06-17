@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'package:atletec/provider/manager.dart';
+import 'package:atletec/widgets/heatmap_widget.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 class SerialDataPlotter extends StatefulWidget {
@@ -14,6 +17,7 @@ class SerialDataPlotter extends StatefulWidget {
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
   SerialPort? port;
+  final config = SerialPortConfig();
   int initIndex = 14;
   double yRange = 8000;
   List<int> buffer = [];
@@ -48,7 +52,10 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM4');
+    port = SerialPort('COM5');
+    config.baudRate = 115200;
+    config.bits = 8;
+    port!.config = config;
     if (port!.openReadWrite()) {
       reader = SerialPortReader(port!);
       broadcastStream = reader!.stream.asBroadcastStream();
@@ -95,7 +102,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _startListening(BuildContext context) {
-    print("OK3");
     if (broadcastStream == null) {
       print('Broadcast Stream is null!');
       return;
@@ -103,22 +109,15 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
     subscription = broadcastStream!.listen(
       (data) {
-        print("OK3");
         for (var byte in data) {
           buffer.add(byte);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
-            print(buffer.elementAt(1));
             if (buffer.elementAt(1) == 3) {
-              print('Ok');
               Provider.of<Manager>(context, listen: false)
                   .updateBattery(buffer.elementAt(8));
-              buffer = [];
-              print('Ok');
             } else if (buffer.elementAt(1) == 1) {
-              print("Length: ${buffer.length}");
-              print(buffer);
               while (_accelxPoints.length > 500) {
                 _accelxPoints.removeAt(0);
                 _accelyPoints.removeAt(0);
@@ -143,18 +142,16 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                   _counter++;
                 });
               }
-              print('ok');
               // buffer = _parseData(buffer);
               // print('Received: $buffer');
-              buffer = [];
             } else if (buffer.elementAt(1) == 2) {
               print('GEO: $buffer');
             }
+            buffer = [];
           }
         }
       },
       onError: (error) {
-        print("Ok error!");
         print('Error: $error');
         _stopListening();
       },
@@ -164,7 +161,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       },
       cancelOnError: true,
     );
-    print("OK4");
     // _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
     //   final response = await http.get(Uri.parse('http://127.0.0.1:5000/data'));
     //   if(response.statusCode == 200){
@@ -215,6 +211,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
+    try{
     return Column(
       children: [
         Row(
@@ -267,6 +264,23 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 : const SizedBox(),
           ],
         ),
+        func == 'Heat' ? Stack(
+          children: [
+            FlutterMap(
+              options: const MapOptions(
+                initialCenter: LatLng(51.509364, -0.128928),
+                initialZoom: 3.2,
+              ),
+              children: [
+                TileLayer(
+                  tileProvider: NetworkTileProvider(),
+                    urlTemplate: 'https://tile.openstreetmap.org/z/x/y.png',
+                    userAgentPackageName: 'com.example.app',
+                ),
+              ],
+            ),
+          ],
+        ) :
         AspectRatio(
             aspectRatio: 2,
             child: Padding(
@@ -344,5 +358,9 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
         )
       ],
     );
+    } catch (e) {
+      print(e);
+      return const Placeholder();
+    }
   }
 }
