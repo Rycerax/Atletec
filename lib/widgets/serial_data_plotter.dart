@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'package:atletec/provider/manager.dart';
-import 'package:atletec/widgets/heatmap_widget.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 class SerialDataPlotter extends StatefulWidget {
@@ -53,10 +50,10 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   void _initPort(BuildContext context) {
     port = SerialPort('COM5');
-    config.baudRate = 115200;
-    config.bits = 8;
-    port!.config = config;
     if (port!.openReadWrite()) {
+      config.baudRate = 115200;
+      config.bits = 8;
+      port!.config = config;
       reader = SerialPortReader(port!);
       broadcastStream = reader!.stream.asBroadcastStream();
       _startListening(context);
@@ -107,10 +104,11 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       return;
     }
 
-    subscription = broadcastStream!.listen(
+    subscription = reader!.stream.listen(
       (data) {
         for (var byte in data) {
           buffer.add(byte);
+          print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
@@ -264,23 +262,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 : const SizedBox(),
           ],
         ),
-        func == 'Heat' ? Stack(
-          children: [
-            FlutterMap(
-              options: const MapOptions(
-                initialCenter: LatLng(51.509364, -0.128928),
-                initialZoom: 3.2,
-              ),
-              children: [
-                TileLayer(
-                  tileProvider: NetworkTileProvider(),
-                    urlTemplate: 'https://tile.openstreetmap.org/z/x/y.png',
-                    userAgentPackageName: 'com.example.app',
-                ),
-              ],
-            ),
-          ],
-        ) :
         AspectRatio(
             aspectRatio: 2,
             child: Padding(
