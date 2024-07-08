@@ -23,8 +23,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int initIndex = 14;
   double yRange = 8000;
   List<int> buffer = [];
-  List<double> _lat = [];
-  List<double> _long = [];
   String func = 'Accel';
   SerialPortReader? reader;
   bool playing = false;
@@ -94,26 +92,33 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return val;
   }
 
-  Future<void> _saveCoordinates(double lat, double long) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/coordinates.json');
-    Map<String, dynamic> coordinates;
+  Future<void> _saveCoordinates(int cont, double lat, double long) async {
+    // final directory = await getApplicationDocumentsDirectory();
+    final file = File('C:/Users/victo/Documents/Projetos/Atletec/coordinates.txt');
 
-    if (await file.exists()) {
-      String content = await file.readAsString();
-      coordinates = jsonDecode(content);
-      coordinates['x'].add(lat);
-      coordinates['y'].add(long);
-    } else {
-      coordinates = {'x': [lat], 'y': [long]};
-    }
+    // Limpar o conteúdo do arquivo antes de escrever novos dados
+    // await file.writeAsString('');
 
-    await file.writeAsString(jsonEncode(coordinates));
+    // Escrever as coordenadas no arquivo .txt
+    await file.writeAsString('$func $cont $lat $long', mode: FileMode.write);
   }
 
   double _bytesToDouble(Uint8List bytes) {
     ByteData byteData = ByteData.sublistView(bytes);
     return byteData.getFloat64(0, Endian.big);
+  }
+
+  int _bytesToInt(List<int> bytes) {
+    if (bytes.length != 4) {
+      throw ArgumentError('A lista de bytes deve conter exatamente 4 elementos.');
+    }
+
+    ByteData byteData = ByteData(4);
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, bytes[i]);
+    }
+    
+    return byteData.getInt32(0, Endian.big);
   }
   
   void _stopListening() {
@@ -173,13 +178,12 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
               Uint8List newData = Uint8List.fromList(buffer);
+              Uint8List contador = newData.sublist(4, 8);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
-
-              _lat = _bytesToDouble(latBytes);
-              _long = _bytesToDouble(longBytes);
-              print("Lat:  $lat ; Long: $long");
-              print('GEO: $buffer');
+              _saveCoordinates(_bytesToInt(contador), _bytesToDouble(latBytes), _bytesToDouble(longBytes));
+              print(_bytesToDouble(latBytes));
+              print(_bytesToDouble(longBytes));
             }
             buffer = [];
           }
