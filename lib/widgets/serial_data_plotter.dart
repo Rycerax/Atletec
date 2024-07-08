@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:atletec/provider/manager.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+
 
 class SerialDataPlotter extends StatefulWidget {
   const SerialDataPlotter({super.key});
@@ -49,7 +54,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM5');
+    port = SerialPort('COM7');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -87,6 +92,35 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return val;
   }
 
+  Future<void> _saveCoordinates(int cont, double lat, double long) async {
+    // final directory = await getApplicationDocumentsDirectory();
+    final file = File('C:/Users/victo/Documents/Projetos/Atletec/coordinates.txt');
+
+    // Limpar o conteúdo do arquivo antes de escrever novos dados
+    // await file.writeAsString('');
+
+    // Escrever as coordenadas no arquivo .txt
+    await file.writeAsString('$func $cont $lat $long', mode: FileMode.write);
+  }
+
+  double _bytesToDouble(Uint8List bytes) {
+    ByteData byteData = ByteData.sublistView(bytes);
+    return byteData.getFloat64(0, Endian.big);
+  }
+
+  int _bytesToInt(List<int> bytes) {
+    if (bytes.length != 4) {
+      throw ArgumentError('A lista de bytes deve conter exatamente 4 elementos.');
+    }
+
+    ByteData byteData = ByteData(4);
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, bytes[i]);
+    }
+    
+    return byteData.getInt32(0, Endian.big);
+  }
+  
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
@@ -108,7 +142,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       (data) {
         for (var byte in data) {
           buffer.add(byte);
-          print(buffer);
+          // print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
@@ -143,7 +177,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // buffer = _parseData(buffer);
               // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
-              print('GEO: $buffer');
+              Uint8List newData = Uint8List.fromList(buffer);
+              Uint8List contador = newData.sublist(4, 8);
+              Uint8List latBytes = newData.sublist(8, 16);
+              Uint8List longBytes = newData.sublist(16, 24);
+              _saveCoordinates(_bytesToInt(contador), _bytesToDouble(latBytes), _bytesToDouble(longBytes));
+              print(_bytesToDouble(latBytes));
+              print(_bytesToDouble(longBytes));
             }
             buffer = [];
           }
