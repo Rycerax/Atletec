@@ -1,4 +1,3 @@
-import 'package:atletec/const/constant.dart';
 import 'package:atletec/data/side_menu_data.dart';
 import 'package:atletec/provider/manager.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:atletec/provider/manager.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+
 
 class SerialDataPlotter extends StatefulWidget {
   const SerialDataPlotter({super.key});
@@ -18,6 +23,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int initIndex = 14;
   double yRange = 8000;
   List<int> buffer = [];
+  List<double> _lat = [];
+  List<double> _long = [];
   String func = 'Accel';
   SerialPortReader? reader;
   bool playing = false;
@@ -49,7 +56,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM5');
+    port = SerialPort('COM7');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -87,6 +94,28 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return val;
   }
 
+  Future<void> _saveCoordinates(double lat, double long) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/coordinates.json');
+    Map<String, dynamic> coordinates;
+
+    if (await file.exists()) {
+      String content = await file.readAsString();
+      coordinates = jsonDecode(content);
+      coordinates['x'].add(lat);
+      coordinates['y'].add(long);
+    } else {
+      coordinates = {'x': [lat], 'y': [long]};
+    }
+
+    await file.writeAsString(jsonEncode(coordinates));
+  }
+
+  double _bytesToDouble(Uint8List bytes) {
+    ByteData byteData = ByteData.sublistView(bytes);
+    return byteData.getFloat64(0, Endian.big);
+  }
+  
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
@@ -108,7 +137,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       (data) {
         for (var byte in data) {
           buffer.add(byte);
-          print(buffer);
+          // print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
@@ -143,6 +172,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // buffer = _parseData(buffer);
               // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
+              Uint8List newData = Uint8List.fromList(buffer);
+              Uint8List latBytes = newData.sublist(8, 16);
+              Uint8List longBytes = newData.sublist(16, 24);
+
+              _lat = _bytesToDouble(latBytes);
+              _long = _bytesToDouble(longBytes);
+              print("Lat:  $lat ; Long: $long");
               print('GEO: $buffer');
             }
             buffer = [];
