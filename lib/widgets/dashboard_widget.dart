@@ -28,7 +28,7 @@ class Dashboardwidget extends StatelessWidget {
               Container(
                 height: 13,
               ),
-              const SerialDataPlotter()
+              const SerialDataPlotter(),
             ],
           );
   }

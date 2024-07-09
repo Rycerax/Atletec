@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/widgets.dart';
 
 
 class SerialDataPlotter extends StatefulWidget {
@@ -19,6 +20,8 @@ class SerialDataPlotter extends StatefulWidget {
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
   SerialPort? port;
+  String? _key;
+  String imgUrl = 'lib/images/heatmap.png';
   final config = SerialPortConfig();
   int initIndex = 14;
   double yRange = 8000;
@@ -33,9 +36,14 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   final _accelzPoints = <FlSpot>[];
   Timer? _timer;
   int _counter = 0;
+  File? imgFile;
+  Image? previewImage;
+  int imgKey = 0;
   @override
   void initState() {
     super.initState();
+    imgFile = File('./lib/images/heatmap.png');
+    previewImage = Image.file(imgFile!);
     resetData();
   }
 
@@ -54,7 +62,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM7');
+    port = SerialPort('COM3');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -94,7 +102,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   Future<void> _saveCoordinates(int cont, double lat, double long) async {
     // final directory = await getApplicationDocumentsDirectory();
-    final file = File('C:/Users/victo/Documents/Projetos/Atletec/coordinates.txt');
+    final file = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
 
     // Limpar o conteúdo do arquivo antes de escrever novos dados
     // await file.writeAsString('');
@@ -124,6 +132,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
+    _timer?.cancel();
     resetData();
 
     if (port != null && port!.isOpen) {
@@ -133,6 +142,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _startListening(BuildContext context) {
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      setState(() {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+      });
+    });
     if (broadcastStream == null) {
       print('Broadcast Stream is null!');
       return;
@@ -240,7 +256,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     reader!.close();
     _stopListening();
     super.dispose();
@@ -259,6 +274,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 value: 'Accel',
                 groupValue: func,
                 onChanged: (val) {
+                  st.updateFunc(val!);
                   setState(() {
                     func = val.toString();
                     initIndex = 14;
@@ -275,6 +291,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 groupValue: func,
                 onChanged: (val) {
                   setState(() {
+                    st.updateFunc(val!);
                     func = val.toString();
                     initIndex = 8;
                     yRange = 32000;
@@ -291,6 +308,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                     groupValue: func,
                     onChanged: (val) {
                       setState(() {
+                        st.updateFunc(val!);
                         func = val.toString();
                       });
                     },
@@ -302,6 +320,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                 : const SizedBox(),
           ],
         ),
+        st.func != 'Heat' ?
         AspectRatio(
             aspectRatio: 2,
             child: Padding(
@@ -358,7 +377,9 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                   ),
                 ),
               ),
-            )),
+            )) : Center(
+              child: imgFile == null ? const Placeholder() : Image.file(imgFile!, key: ValueKey(imgKey))
+            ),
         Center(
           child: IconButton(
             iconSize: 35,
