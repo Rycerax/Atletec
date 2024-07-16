@@ -102,13 +102,32 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   Future<void> _saveCoordinates(int cont, double lat, double long) async {
     // final directory = await getApplicationDocumentsDirectory();
-    final file = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
+    // final file = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
+    File lockFile = File("C:/Users/rafae/Projects/atletec/file.lock");
+    File dataFile = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
+
+    while(await lockFile.exists()){
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
 
     // Limpar o conteúdo do arquivo antes de escrever novos dados
     // await file.writeAsString('');
 
     // Escrever as coordenadas no arquivo .txt
-    await file.writeAsString('$func $cont $lat $long', mode: FileMode.write);
+    try {
+      if(!(await lockFile.exists())){
+        await lockFile.create();
+      }
+      await dataFile.writeAsString('$func $cont $lat $long', mode: FileMode.write); 
+    } finally {
+      if(await lockFile.exists()){
+        try {
+          await lockFile.delete();
+        } catch (e) {
+          print("Erro: $e");
+        }
+      }
+    }
   }
 
   double _bytesToDouble(Uint8List bytes) {
