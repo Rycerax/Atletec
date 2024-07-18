@@ -8,7 +8,8 @@ import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 
 class SerialDataPlotter extends StatefulWidget {
   const SerialDataPlotter({super.key});
@@ -19,6 +20,8 @@ class SerialDataPlotter extends StatefulWidget {
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
   SerialPort? port;
+  String? _key;
+  String imgUrl = 'lib/images/heatmap.png';
   final config = SerialPortConfig();
   int initIndex = 14;
   double yRange = 8000;
@@ -33,13 +36,25 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   final _accelzPoints = <FlSpot>[];
   Timer? _timer;
   int _counter = 0;
+  File? imgFile;
+  Image? previewImage;
+  int imgKey = 0;
   @override
   void initState() {
     super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      setState(() {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+      });
+    });
+    imgFile = File('./lib/images/heatmap.png');
+    previewImage = Image.file(imgFile!);
     resetData();
   }
 
-  void resetData() {
+  void resetData() async {
     for (var i = 0; i < 500; ++i) {
       setState(() {
         _accelxPoints.add(FlSpot(_counter.toDouble(), 0.0));
@@ -92,15 +107,48 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return val;
   }
 
-  Future<void> _saveCoordinates(int cont, double lat, double long) async {
+  void _saveCoordinates(double lat, double long) async {
+    // final socket = await Socket.connect('127.0.0.1', 65432);
+    // print('Conectado!');
+    await http.post(
+      Uri.parse('http://127.0.0.1:5000/execute'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'data': '$func $lat $long',
+      }),
+    );
+    // await Future.delayed(const Duration(seconds: 2));
+    // print('Conexão encerrada.');
     // final directory = await getApplicationDocumentsDirectory();
-    final file = File('C:/Users/victo/Documents/Projetos/Atletec/coordinates.txt');
+    // final file = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
+    // File lockFile = File("C:/Users/rafae/Projects/atletec/file.lock");
+    // File dataFile = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
+
+    // while (await lockFile.exists()) {
+    //   await Future.delayed(const Duration(milliseconds: 100));
+    // }
 
     // Limpar o conteúdo do arquivo antes de escrever novos dados
     // await file.writeAsString('');
 
     // Escrever as coordenadas no arquivo .txt
-    await file.writeAsString('$func $cont $lat $long', mode: FileMode.write);
+    // try {
+    //   if (!(await lockFile.exists())) {
+    //     await lockFile.create();
+    //   }
+    //   await dataFile.writeAsString('$func $cont $lat $long',
+    //       mode: FileMode.write);
+    // } finally {
+    //   if (await lockFile.exists()) {
+    //     try {
+    //       await lockFile.delete();
+    //     } catch (e) {
+    //       print("Erro: $e");
+    //     }
+    //   }
+    // }
   }
 
   double _bytesToDouble(Uint8List bytes) {
@@ -108,22 +156,24 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return byteData.getFloat64(0, Endian.big);
   }
 
-  int _bytesToInt(List<int> bytes) {
-    if (bytes.length != 4) {
-      throw ArgumentError('A lista de bytes deve conter exatamente 4 elementos.');
-    }
+  // int _bytesToInt(List<int> bytes) {
+  //   if (bytes.length != 4) {
+  //     throw ArgumentError(
+  //         'A lista de bytes deve conter exatamente 4 elementos.');
+  //   }
 
-    ByteData byteData = ByteData(4);
-    for (int i = 0; i < 4; i++) {
-      byteData.setUint8(i, bytes[i]);
-    }
-    
-    return byteData.getInt32(0, Endian.big);
-  }
-  
+  //   ByteData byteData = ByteData(4);
+  //   for (int i = 0; i < 4; i++) {
+  //     byteData.setUint8(i, bytes[i]);
+  //   }
+
+  //   return byteData.getInt32(0, Endian.big);
+  // }
+
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
+    _timer?.cancel();
     resetData();
 
     if (port != null && port!.isOpen) {
@@ -178,10 +228,9 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
               Uint8List newData = Uint8List.fromList(buffer);
-              Uint8List contador = newData.sublist(4, 8);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
-              _saveCoordinates(_bytesToInt(contador), _bytesToDouble(latBytes), _bytesToDouble(longBytes));
+              _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));
             }
@@ -240,7 +289,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     reader!.close();
     _stopListening();
     super.dispose();
@@ -249,136 +297,144 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
-    try{
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            RadioMenuButton(
-                value: 'Accel',
-                groupValue: func,
-                onChanged: (val) {
-                  setState(() {
-                    func = val.toString();
-                    initIndex = 14;
-                    yRange = 8000;
-                  });
-                },
-                style: ButtonStyle(
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10))),
-                    elevation: const WidgetStatePropertyAll(5)),
-                child: const Text('Accelerometer')),
-            RadioMenuButton(
-                value: 'Gyro',
-                groupValue: func,
-                onChanged: (val) {
-                  setState(() {
-                    func = val.toString();
-                    initIndex = 8;
-                    yRange = 32000;
-                  });
-                },
-                style: ButtonStyle(
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10))),
-                    elevation: const WidgetStatePropertyAll(5)),
-                child: const Text('Gyroscope')),
-            st.sport == 'Soccer'
-                ? RadioMenuButton(
-                    value: 'Heat',
-                    groupValue: func,
-                    onChanged: (val) {
-                      setState(() {
-                        func = val.toString();
-                      });
-                    },
-                    style: ButtonStyle(
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10))),
-                        elevation: const WidgetStatePropertyAll(5)),
-                    child: const Text('Heat Map'))
-                : const SizedBox(),
-          ],
-        ),
-        AspectRatio(
-            aspectRatio: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: LineChart(
-                LineChartData(
-                  minY: -yRange,
-                  maxY: yRange,
-                  minX: _accelxPoints.first.x + 20,
-                  maxX: _accelxPoints.last.x,
-                  lineTouchData: const LineTouchData(enabled: false),
-                  clipData: const FlClipData.all(),
-                  gridData: const FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                  ),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                        spots: _accelxPoints,
-                        isCurved: true,
-                        barWidth: 2,
-                        color: Colors.red,
-                        belowBarData: BarAreaData(show: false),
-                        dotData: const FlDotData(show: false)),
-                    LineChartBarData(
-                        spots: _accelyPoints,
-                        isCurved: true,
-                        barWidth: 2,
-                        color: Colors.green,
-                        belowBarData: BarAreaData(show: false),
-                        dotData: const FlDotData(show: false)),
-                    LineChartBarData(
-                        spots: _accelzPoints,
-                        isCurved: true,
-                        barWidth: 2,
-                        color: Colors.blue,
-                        belowBarData: BarAreaData(show: false),
-                        dotData: const FlDotData(show: false))
-                  ],
-                  titlesData: const FlTitlesData(
-                    show: true,
-                    rightTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    topTitles:
-                        AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    leftTitles: AxisTitles(
-                      sideTitles:
-                          SideTitles(showTitles: true, reservedSize: 40),
-                    ),
-                  ),
-                ),
-              ),
-            )),
-        Center(
-          child: IconButton(
-            iconSize: 35,
-            icon: playing
-                ? const Icon(Icons.stop_circle_rounded)
-                : const Icon(Icons.play_circle_filled_rounded),
-            onPressed: () {
-              if (playing) {
-                _stopListening();
-              } else {
-                _initPort(context);
-              }
-              setState(() {
-                playing = !playing;
-              });
-            },
+    try {
+      return Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              RadioMenuButton(
+                  value: 'Accel',
+                  groupValue: func,
+                  onChanged: (val) {
+                    st.updateFunc(val!);
+                    setState(() {
+                      func = val.toString();
+                      initIndex = 14;
+                      yRange = 8000;
+                    });
+                  },
+                  style: ButtonStyle(
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                      elevation: const WidgetStatePropertyAll(5)),
+                  child: const Text('Accelerometer')),
+              RadioMenuButton(
+                  value: 'Gyro',
+                  groupValue: func,
+                  onChanged: (val) {
+                    setState(() {
+                      st.updateFunc(val!);
+                      func = val.toString();
+                      initIndex = 8;
+                      yRange = 32000;
+                    });
+                  },
+                  style: ButtonStyle(
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10))),
+                      elevation: const WidgetStatePropertyAll(5)),
+                  child: const Text('Gyroscope')),
+              st.sport == 'Soccer'
+                  ? RadioMenuButton(
+                      value: 'Heat',
+                      groupValue: func,
+                      onChanged: (val) {
+                        setState(() {
+                          st.updateFunc(val!);
+                          func = val.toString();
+                        });
+                      },
+                      style: ButtonStyle(
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                          elevation: const WidgetStatePropertyAll(5)),
+                      child: const Text('Heat Map'))
+                  : const SizedBox(),
+            ],
           ),
-        )
-      ],
-    );
+          st.func != 'Heat'
+              ? AspectRatio(
+                  aspectRatio: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: LineChart(
+                      LineChartData(
+                        minY: -yRange,
+                        maxY: yRange,
+                        minX: _accelxPoints.first.x + 20,
+                        maxX: _accelxPoints.last.x,
+                        lineTouchData: const LineTouchData(enabled: false),
+                        clipData: const FlClipData.all(),
+                        gridData: const FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                        ),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                              spots: _accelxPoints,
+                              isCurved: true,
+                              barWidth: 2,
+                              color: Colors.red,
+                              belowBarData: BarAreaData(show: false),
+                              dotData: const FlDotData(show: false)),
+                          LineChartBarData(
+                              spots: _accelyPoints,
+                              isCurved: true,
+                              barWidth: 2,
+                              color: Colors.green,
+                              belowBarData: BarAreaData(show: false),
+                              dotData: const FlDotData(show: false)),
+                          LineChartBarData(
+                              spots: _accelzPoints,
+                              isCurved: true,
+                              barWidth: 2,
+                              color: Colors.blue,
+                              belowBarData: BarAreaData(show: false),
+                              dotData: const FlDotData(show: false))
+                        ],
+                        titlesData: const FlTitlesData(
+                          show: true,
+                          rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false)),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles:
+                                SideTitles(showTitles: true, reservedSize: 40),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ))
+              : Center(
+                  child: imgFile == null
+                      ? const Placeholder()
+                      : Image.file(imgFile!, key: ValueKey(imgKey))),
+          Center(
+            child: IconButton(
+              iconSize: 35,
+              icon: playing
+                  ? const Icon(Icons.stop_circle_rounded)
+                  : const Icon(Icons.play_circle_filled_rounded),
+              onPressed: () {
+                if (playing) {
+                  _stopListening();
+                } else {
+                  _initPort(context);
+                }
+                setState(() {
+                  playing = !playing;
+                });
+              },
+            ),
+          )
+        ],
+      );
     } catch (e) {
       print(e);
       return const Placeholder();
