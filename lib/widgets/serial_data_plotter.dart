@@ -42,13 +42,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      setState(() {
-        imageCache.clear();
-        imageCache.clearLiveImages();
-        imgKey ^= 1;
-      });
-    });
+    // _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+    //   setState(() {
+    //     imageCache.clear();
+    //     imageCache.clearLiveImages();
+    //     imgKey ^= 1;
+    //   });
+    // });
     imgFile = File('./lib/images/heatmap.png');
     previewImage = Image.file(imgFile!);
     resetData();
@@ -69,7 +69,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM5');
+    port = SerialPort('COM3');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -110,7 +110,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   void _saveCoordinates(double lat, double long) async {
     // final socket = await Socket.connect('127.0.0.1', 65432);
     // print('Conectado!');
-    await http.post(
+    final res = await http.post(
       Uri.parse('http://127.0.0.1:5000/execute'),
       headers: {
         'Content-Type': 'application/json',
@@ -119,6 +119,14 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
         'data': '$func $lat $long',
       }),
     );
+
+    if(res.statusCode == 200){
+      setState(() {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+      });
+    }
     // await Future.delayed(const Duration(seconds: 2));
     // print('Conexão encerrada.');
     // final directory = await getApplicationDocumentsDirectory();
@@ -173,7 +181,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
-    _timer?.cancel();
     resetData();
 
     if (port != null && port!.isOpen) {
@@ -290,6 +297,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     reader!.close();
     _stopListening();
     super.dispose();
