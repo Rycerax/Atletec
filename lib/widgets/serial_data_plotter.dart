@@ -7,8 +7,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class SerialDataPlotter extends StatefulWidget {
@@ -20,7 +18,6 @@ class SerialDataPlotter extends StatefulWidget {
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
   SerialPort? port;
-  String? _key;
   String imgUrl = 'lib/images/heatmap.png';
   final config = SerialPortConfig();
   int initIndex = 14;
@@ -36,6 +33,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   final _accelzPoints = <FlSpot>[];
   Timer? _timer;
   int _counter = 0;
+  int fileCounter = 0;
   File? imgFile;
   Image? previewImage;
   int imgKey = 0;
@@ -51,6 +49,10 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     // });
     imgFile = File('./lib/images/heatmap.png');
     previewImage = Image.file(imgFile!);
+    setState(() {
+      imageCache.clear();
+      imageCache.clearLiveImages(); 
+    });
     resetData();
   }
 
@@ -189,20 +191,23 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
   }
 
-  void _startListening(BuildContext context) {
+  void _startListening(BuildContext context) async {
     if (broadcastStream == null) {
       print('Broadcast Stream is null!');
       return;
     }
-
+    // File dataFile = File("C:/Users/rafae/Projects/atletec/games/game$fileCounter.txt");
+    // fileCounter++;
+    // await dataFile.create();
     subscription = reader!.stream.listen(
-      (data) {
+      (data) async {
         for (var byte in data) {
           buffer.add(byte);
           // print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
+            // await dataFile.writeAsString(buffer.toString(), mode: FileMode.append);
             if (buffer.elementAt(1) == 3) {
               Provider.of<Manager>(context, listen: false)
                   .updateBattery(buffer.elementAt(8));
