@@ -7,8 +7,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
-import 'package:path_provider/path_provider.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class SerialDataPlotter extends StatefulWidget {
@@ -20,7 +18,6 @@ class SerialDataPlotter extends StatefulWidget {
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
   SerialPort? port;
-  String? _key;
   String imgUrl = 'lib/images/heatmap.png';
   final config = SerialPortConfig();
   int initIndex = 14;
@@ -36,21 +33,26 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   final _accelzPoints = <FlSpot>[];
   Timer? _timer;
   int _counter = 0;
+  int fileCounter = 0;
   File? imgFile;
   Image? previewImage;
   int imgKey = 0;
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      setState(() {
-        imageCache.clear();
-        imageCache.clearLiveImages();
-        imgKey ^= 1;
-      });
-    });
+    // _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+    //   setState(() {
+    //     imageCache.clear();
+    //     imageCache.clearLiveImages();
+    //     imgKey ^= 1;
+    //   });
+    // });
     imgFile = File('./lib/images/heatmap.png');
     previewImage = Image.file(imgFile!);
+    setState(() {
+      imageCache.clear();
+      imageCache.clearLiveImages(); 
+    });
     resetData();
   }
 
@@ -110,7 +112,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   void _saveCoordinates(double lat, double long) async {
     // final socket = await Socket.connect('127.0.0.1', 65432);
     // print('Conectado!');
-    await http.post(
+    final res = await http.post(
       Uri.parse('http://127.0.0.1:5000/execute'),
       headers: {
         'Content-Type': 'application/json',
@@ -119,6 +121,14 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
         'data': '$func $lat $long',
       }),
     );
+
+    if(res.statusCode == 200){
+      setState(() {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+      });
+    }
     // await Future.delayed(const Duration(seconds: 2));
     // print('Conexão encerrada.');
     // final directory = await getApplicationDocumentsDirectory();
@@ -173,7 +183,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   void _stopListening() {
     subscription?.cancel();
     subscription = null;
-    _timer?.cancel();
     resetData();
 
     if (port != null && port!.isOpen) {
@@ -182,20 +191,23 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
   }
 
-  void _startListening(BuildContext context) {
+  void _startListening(BuildContext context) async {
     if (broadcastStream == null) {
       print('Broadcast Stream is null!');
       return;
     }
-
+    // File dataFile = File("C:/Users/rafae/Projects/atletec/games/game$fileCounter.txt");
+    // fileCounter++;
+    // await dataFile.create();
     subscription = reader!.stream.listen(
-      (data) {
+      (data) async {
         for (var byte in data) {
           buffer.add(byte);
           // print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
+            // await dataFile.writeAsString(buffer.toString(), mode: FileMode.append);
             if (buffer.elementAt(1) == 3) {
               Provider.of<Manager>(context, listen: false)
                   .updateBattery(buffer.elementAt(8));
@@ -289,6 +301,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     reader!.close();
     _stopListening();
     super.dispose();
