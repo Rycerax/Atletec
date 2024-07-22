@@ -20,7 +20,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final st = Provider.of<Manager>(context);
+    final manager = Provider.of<Manager>(context);
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,14 +36,26 @@ class _HeaderWidgetState extends State<HeaderWidget> {
             ),
           ),
         ),
-        st.sport == 'Soccer'
+        manager.sport == 'Soccer'
             ? Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: const DropdownMenu(
-                    expandedInsets: EdgeInsets.zero,
-                    label: Text('Select Field'),
-                    dropdownMenuEntries: [],
+                  child: DropdownButtonFormField(
+                    decoration: const InputDecoration(
+                      labelText: 'Select Field',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: manager.fields.map((field) {
+                      return DropdownMenuItem(
+                        value: field,
+                        child: Text(field.name),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        manager.selectField(value);
+                      }
+                    },
                   ),
                 ),
               )
@@ -51,10 +63,22 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         Expanded(
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 10),
-            child: const DropdownMenu(
-              expandedInsets: EdgeInsets.zero,
-              label: Text('Select Player'),
-              dropdownMenuEntries: [],
+            child: DropdownButtonFormField(
+              decoration: const InputDecoration(
+                labelText: 'Select Player',
+                border: OutlineInputBorder(),
+              ),
+              items: manager.players.map((player) {
+                return DropdownMenuItem(
+                  value: player,
+                  child: Text(player.name),
+                );
+              }).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  manager.selectPlayer(value);
+                }
+              },
             ),
           ),
         ),
@@ -62,7 +86,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           padding: const EdgeInsets.only(right: 10),
           child: IconButton(
             onPressed: () {
-              st.updatePorts();
+              manager.updatePorts();
             },
             icon: const Icon(Icons.refresh),
             iconSize: 33,

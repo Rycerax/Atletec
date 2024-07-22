@@ -3,6 +3,7 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:hive/hive.dart';
 import 'package:atletec/model/player.dart';
 import 'package:atletec/model/field.dart';
+import 'package:atletec/model/match.dart';
 
 class Manager with ChangeNotifier {
   String _sport = '';
@@ -12,9 +13,11 @@ class Manager with ChangeNotifier {
   int _battery = 0;
   Player? _selectedPlayer;
   Field? _selectedField;
+  Match? _selectedMatch;
 
   late Box<Player> _playerBox;
   late Box<Field> _fieldBox;
+  late Box<Match> _matchBox;
 
   Manager() {
     _init();
@@ -23,12 +26,16 @@ class Manager with ChangeNotifier {
   Future<void> _init() async {
     _playerBox = await Hive.openBox<Player>('players');
     _fieldBox = await Hive.openBox<Field>('fields');
+    _matchBox = await Hive.openBox<Match>('matches');
   }
 
   List<Player> get players => _playerBox.values.toList();
   List<Field> get fields => _fieldBox.values.toList();
+  List<Match> get matches => _matchBox.values.toList();
+
   Player? get selectedPlayer => _selectedPlayer;
   Field? get selectedField => _selectedField;
+  Match? get selectedMatch => _selectedMatch;
 
   String get func => _func;
   String get sport => _sport;
@@ -104,6 +111,41 @@ class Manager with ChangeNotifier {
       return 1;
     } else {
       return _fieldBox.values.map((field) => field.id).reduce((a, b) => a > b ? a : b) + 1;
+    }
+  }
+
+  void addMatch(Match match) {
+    _matchBox.add(match);
+    notifyListeners();
+  }
+
+  void removeMatch(int id) {
+    final match = _matchBox.values.firstWhere((match) => match.id == id);
+    match.delete();
+    _selectedMatch = null;
+    notifyListeners();
+  }
+
+  void updateMatch(Match updatedMatch) {
+    final match = _matchBox.values.firstWhere((match) => match.id == updatedMatch.id);
+    match.field = updatedMatch.field;
+    match.name = updatedMatch.name;
+    match.description = updatedMatch.description;
+    match.player = updatedMatch.player;
+    match.save();
+    notifyListeners();
+  }
+
+  void selectMatch(Match match) {
+    _selectedMatch = match;
+    notifyListeners();
+  }
+
+  int getNextMatchId() {
+    if (_matchBox.isEmpty) {
+      return 1;
+    } else {
+      return _matchBox.values.map((match) => match.id).reduce((a, b) => a > b ? a : b) + 1;
     }
   }
 
