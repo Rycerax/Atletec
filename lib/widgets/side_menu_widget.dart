@@ -3,6 +3,7 @@ import 'package:atletec/provider/manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/players_screen.dart';
+import '../screens/fields_screen.dart';
 
 class SideMenuWidget extends StatefulWidget {
   const SideMenuWidget({super.key});
@@ -81,9 +82,12 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         onTap: () => setState(() {
           print(data.menu[index].title);
           if(data.menu[index].title == "Players"){
-            Navigator.push(
-              context,
+            Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => PlayersScreen()),
+            );
+          } else if(data.menu[index].title == "Fields"){
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => FieldsScreen()),
             );
           }
         }),

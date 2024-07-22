@@ -4,6 +4,8 @@ import '../provider/manager.dart';
 import '../model/player.dart';
 
 class PlayersScreen extends StatelessWidget {
+  const PlayersScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final manager = Provider.of<Manager>(context);
@@ -81,12 +83,12 @@ class PlayersScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
+            // TextButton(
+            //   onPressed: () {
+            //     Navigator.of(context).pop();
+            //   },
+            //   child: const Text('Cancel'),
+            // ),
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () {
