@@ -17,7 +17,7 @@ class FieldAdapter extends TypeAdapter<Field> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Field(
-      id: fields[0] as Int,
+      id: fields[0] as int,
       coordinates: fields[1] as String,
       name: fields[2] as String,
     );

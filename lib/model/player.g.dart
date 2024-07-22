@@ -17,12 +17,12 @@ class PlayerAdapter extends TypeAdapter<Player> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Player(
-      id: fields[0] as Int,
+      id: fields[0] as int,
       name: fields[1] as String,
       cpf: fields[2] as String,
       sexo: fields[3] as String,
-      peso: fields[4] as Float,
-      altura: fields[5] as Float,
+      peso: fields[4] as double,
+      altura: fields[5] as double,
       sport: fields[6] as String,
       posicao: fields[7] as String,
       observacao: fields[8] as String,

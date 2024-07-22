@@ -1,159 +1,96 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../provider/manager.dart';
+import '../model/player.dart';
 
-
-class NavButton extends StatelessWidget {
-
-  final IconData icon;
-  final String title;
-  final VoidCallback onPressed;
-
-  const NavButton({super.key, 
-    required this.icon,
-    required this.title,
-    required this.onPressed,
-  });
-
+class PlayersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, color: Colors.white),
-        label: Text(title, style: const TextStyle(color: Colors.white)),
-        style: TextButton.styleFrom(
-          backgroundColor: Colors.blueGrey[900],
-          minimumSize: const Size(double.infinity, 50),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        ),
-      ),
-    );
-  }
-}
+    final manager = Provider.of<Manager>(context);
 
-class TopBar extends StatelessWidget {
-  const TopBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          DropdownButton<String>(
-            dropdownColor: Colors.grey[900],
-            value: 'Select COM Port',
-            items: <String>['Select COM Port', 'COM1', 'COM2', 'COM3']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value, style: const TextStyle(color: Colors.white)),
-              );
-            }).toList(),
-            onChanged: (_) {},
-          ),
-          DropdownButton<String>(
-            dropdownColor: Colors.grey[900],
-            value: 'Select Field',
-            items: <String>['Select Field', 'Field1', 'Field2', 'Field3']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value, style: const TextStyle(color: Colors.white)),
-              );
-            }).toList(),
-            onChanged: (_) {},
-          ),
-          DropdownButton<String>(
-            dropdownColor: Colors.grey[900],
-            value: 'Select Player',
-            items: <String>['Select Player', 'Player1', 'Player2', 'Player3']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value, style: const TextStyle(color: Colors.white)),
-              );
-            }).toList(),
-            onChanged: (_) {},
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class JogadoresScreen extends StatelessWidget {
-  const JogadoresScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gerenciar Jogadores'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: ListView(
-                children: const [
-                  ListTile(
-                    title: Text('velocidade'),
-                  ),
-                  ListTile(
-                    title: Text('treino01'),
-                  ),
-                  ListTile(
-                    title: Text('treino02'),
-                  ),
-                ],
+      body: Row(
+        children: [
+          // Lista de jogadores
+          Expanded(
+            flex: 2,
+            child: Container(
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+              ),
+              child: ListView.builder(
+                itemCount: manager.players.length,
+                itemBuilder: (context, index) {
+                  final player = manager.players[index];
+                  return ListTile(
+                    title: Text(player.name),
+                    tileColor: manager.selectedPlayer?.id == player.id ? Colors.grey[700] : null,
+                    textColor: manager.selectedPlayer?.id == player.id ? Colors.white : null,
+                    onTap: () {
+                      manager.selectPlayer(player);
+                    },
+                  );
+                },
               ),
             ),
-            Column(
+          ),
+          // Botões de ação
+          Expanded(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                   icon: const Icon(Icons.add),
                   onPressed: () {
-                    // Add your add functionality here
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: () {
-                    // Add your remove functionality here
+                    _showPlayerDialog(context, manager, null);
                   },
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit),
                   onPressed: () {
-                    // Add your edit functionality here
+                    final selectedPlayer = manager.selectedPlayer;
+                    if (selectedPlayer != null) {
+                      _showPlayerDialog(context, manager, selectedPlayer);
+                    } else {
+                      _showMessage(context, 'Selecione um jogador para editar.');
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () {
+                    final selectedPlayer = manager.selectedPlayer;
+                    if (selectedPlayer != null) {
+                      manager.removePlayer(selectedPlayer.id);
+                    } else {
+                      _showMessage(context, 'Selecione um jogador para excluir.');
+                    }
                   },
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () {
-                // Add your OK functionality here
+                Navigator.of(context).pop();
               },
               child: const Text('OK'),
             ),
@@ -161,5 +98,115 @@ class JogadoresScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _showPlayerDialog(BuildContext context, Manager manager, Player? player) {
+    final nameController = TextEditingController(text: player?.name ?? '');
+    final cpfController = TextEditingController(text: player?.cpf ?? '');
+    final sexoController = TextEditingController(text: player?.sexo ?? '');
+    final pesoController = TextEditingController(text: player?.peso.toString() ?? '');
+    final alturaController = TextEditingController(text: player?.altura.toString() ?? '');
+    final sportController = TextEditingController(text: player?.sport ?? '');
+    final posicaoController = TextEditingController(text: player?.posicao ?? '');
+    final observacaoController = TextEditingController(text: player?.observacao ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(player == null ? 'Adicionar Jogador' : 'Editar Jogador'),
+        content: SingleChildScrollView(
+          child: Column(
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nome'),
+              ),
+              TextField(
+                controller: cpfController,
+                decoration: const InputDecoration(labelText: 'CPF'),
+              ),
+              TextField(
+                controller: sexoController,
+                decoration: const InputDecoration(labelText: 'Sexo'),
+              ),
+              TextField(
+                controller: pesoController,
+                decoration: const InputDecoration(labelText: 'Peso'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: alturaController,
+                decoration: const InputDecoration(labelText: 'Altura'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: sportController,
+                decoration: const InputDecoration(labelText: 'Esporte'),
+              ),
+              TextField(
+                controller: posicaoController,
+                decoration: const InputDecoration(labelText: 'Posição'),
+              ),
+              TextField(
+                controller: observacaoController,
+                decoration: const InputDecoration(labelText: 'Observação'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final name = nameController.text;
+              final cpf = cpfController.text;
+              final sexo = sexoController.text;
+              final peso = double.tryParse(pesoController.text) ?? 0.0;
+              final altura = double.tryParse(alturaController.text) ?? 0.0;
+              final sport = sportController.text;
+              final posicao = posicaoController.text;
+              final observacao = observacaoController.text;
+
+              if (player == null) {
+                final newPlayer = Player(
+                  id: manager.getNextPlayerId(),
+                  name: name,
+                  cpf: cpf,
+                  sexo: sexo,
+                  peso: peso,
+                  altura: altura,
+                  sport: sport,
+                  posicao: posicao,
+                  observacao: observacao,
+                );
+                manager.addPlayer(newPlayer);
+              } else {
+                player.name = name;
+                player.cpf = cpf;
+                player.sexo = sexo;
+                player.peso = peso;
+                player.altura = altura;
+                player.sport = sport;
+                player.posicao = posicao;
+                player.observacao = observacao;
+                manager.updatePlayer(player);
+              }
+
+              Navigator.of(context).pop();
+            },
+            child: Text(player == null ? 'Adicionar' : 'Salvar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }

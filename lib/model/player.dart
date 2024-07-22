@@ -1,5 +1,3 @@
-import 'dart:ffi';
-// import 'dart:nativewrappers/_internal/vm/lib/core_patch.dart';
 import 'package:hive/hive.dart';
 
 part 'player.g.dart';
@@ -7,25 +5,24 @@ part 'player.g.dart';
 @HiveType(typeId: 0)
 class Player extends HiveObject{
   @HiveField(0)
-  final Int id;
+  int id;
   @HiveField(1)
-  final String name;
+  String name;
   @HiveField(2)
-  final String cpf;  
+  String cpf;  
   @HiveField(3)
-  final String sexo;
+  String sexo;
   @HiveField(4)
-  final Float peso;
+  double peso;
   @HiveField(5)
-  final Float altura;
+  double altura;
   @HiveField(6)
-  final String sport;
+  String sport;
   @HiveField(7)
-  final String posicao;
+  String posicao;
   @HiveField(8)
-  final String observacao;
+  String observacao;
 
   Player({required this.id, required this.name, required this.cpf, required this.sexo, required this.peso, required this.altura, required this.sport, required this.posicao, required this.observacao});
 
-  
 }
