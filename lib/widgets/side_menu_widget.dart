@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/players_screen.dart';
 import '../screens/fields_screen.dart';
+import '../screens/newMatch_screen.dart';
 
 class SideMenuWidget extends StatefulWidget {
   const SideMenuWidget({super.key});
@@ -19,6 +20,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   Widget build(BuildContext context) {
     final data = SideMenuData();
     final st = Provider.of<Manager>(context);
+    final dropMenuController = TextEditingController(text: st.sport);
     return Column(
       children: [
         Padding(
@@ -29,11 +31,12 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                 .toList(),
             expandedInsets: EdgeInsets.zero,
             label: const Text('Select the Sport'),
+            controller: dropMenuController,
             onSelected: (value) {
               if (value != null) {
-                st.updateSport(value);
+                showDialog(context: context, builder: (context) => NewmatchScreen(selectedSport: value));
               }
-            },
+            }
           ),
         ),
         Expanded(

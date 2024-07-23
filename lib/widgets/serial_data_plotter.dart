@@ -71,7 +71,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM7');
+    port = SerialPort('COM4');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
