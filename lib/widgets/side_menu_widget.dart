@@ -14,7 +14,7 @@ class SideMenuWidget extends StatefulWidget {
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  final sports = ['Soccer', 'Jump System', 'Surf'];
+  final sports = ['Soccer', 'Jump System'];
 
   @override
   Widget build(BuildContext context) {
@@ -23,22 +23,26 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
     final dropMenuController = TextEditingController(text: st.sport);
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10, right: 10, top: 13),
-          child: DropdownMenu(
-            dropdownMenuEntries: sports
-                .map((op) => DropdownMenuEntry(value: op, label: op))
-                .toList(),
-            expandedInsets: EdgeInsets.zero,
-            label: const Text('Select the Sport'),
-            controller: dropMenuController,
-            onSelected: (value) {
-              if (value != null) {
-                showDialog(context: context, builder: (context) => NewmatchScreen(selectedSport: value));
-              }
-            }
-          ),
-        ),
+        // Padding(
+        //   padding: const EdgeInsets.only(left: 10, right: 10, top: 13),
+        //   child: DropdownMenu(
+        //     dropdownMenuEntries: sports
+        //         .map((op) => DropdownMenuEntry(value: op, label: op))
+        //         .toList(),
+        //     expandedInsets: EdgeInsets.zero,
+        //     label: const Text('Select the Sport'),
+        //     controller: dropMenuController,
+        //     onSelected: (value) {
+        //       if (value != null) {
+        //         showDialog(context: context, builder: (context) => NewmatchScreen(selectedSport: value));
+        //       }
+        //     }
+        //   ),
+        // ),
+        // TextButton(
+        //   onPressed: () => showDialog(context: context, builder: (context) => const NewmatchScreen()),
+        //   child: const Text("Novo Evento"),
+        // ),
         Expanded(
           child: ListView.builder(
             itemCount: data.menu.length,
@@ -86,12 +90,14 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           print(data.menu[index].title);
           if(data.menu[index].title == "Players"){
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => PlayersScreen()),
+              MaterialPageRoute(builder: (context) => const PlayersScreen()),
             );
           } else if(data.menu[index].title == "Fields"){
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => FieldsScreen()),
+              MaterialPageRoute(builder: (context) => const FieldsScreen()),
             );
+          } else if (data.menu[index].title == "Novo Evento"){
+            showDialog(context: context, builder: (context) => NewmatchScreen());
           }
         }),
         child: Row(

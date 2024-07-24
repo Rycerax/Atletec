@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class SideMenuData {
   final menu = const <MenuModel>[
+    MenuModel(icon: Icons.add, title: 'Novo Evento'),
     MenuModel(icon: Icons.groups, title: 'Players'),
     MenuModel(icon: Icons.stadium, title: 'Fields'),
     MenuModel(icon: Icons.history, title: 'History'),

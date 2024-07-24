@@ -19,15 +19,19 @@ class Match extends HiveObject{
   String date;
 
   @HiveField(4)
-  Player? player;
+  String sport;
 
   @HiveField(5)
+  Player? player;
+
+  @HiveField(6)
   Field? field;
 
   Match({required this.id, 
   required this.name, 
   required this.description, 
   required this.date,
+  required this.sport,
   required this.player, 
   required this.field});
 

@@ -21,15 +21,16 @@ class MatchAdapter extends TypeAdapter<Match> {
       name: fields[1] as String,
       description: fields[2] as String,
       date: fields[3] as String,
-      player: fields[4] as Player?,
-      field: fields[5] as Field?,
+      sport: fields[4] as String,
+      player: fields[5] as Player?,
+      field: fields[6] as Field?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Match obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -39,8 +40,10 @@ class MatchAdapter extends TypeAdapter<Match> {
       ..writeByte(3)
       ..write(obj.date)
       ..writeByte(4)
-      ..write(obj.player)
+      ..write(obj.sport)
       ..writeByte(5)
+      ..write(obj.player)
+      ..writeByte(6)
       ..write(obj.field);
   }
 
