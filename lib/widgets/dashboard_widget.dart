@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class Dashboardwidget extends StatelessWidget {
+
   const Dashboardwidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
-    return st.sport == ''
+    return st.selectedMatch == null
         ? Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),

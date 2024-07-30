@@ -136,7 +136,7 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
-  void selectMatch(Match match) {
+  void selectMatch(Match? match) {
     _selectedMatch = match;
     notifyListeners();
   }

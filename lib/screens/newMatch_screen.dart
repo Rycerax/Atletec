@@ -140,6 +140,7 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
               );
               manager.addMatch(newMatch);
               manager.updateSport(selectedSport!);
+              manager.selectMatch(newMatch);
               Navigator.of(context).pop();
             } else {
               ScaffoldMessenger.of(context).showSnackBar(

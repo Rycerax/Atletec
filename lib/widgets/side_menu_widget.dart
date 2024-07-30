@@ -1,10 +1,10 @@
 import 'package:atletec/data/side_menu_data.dart';
-import 'package:atletec/provider/manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/players_screen.dart';
 import '../screens/fields_screen.dart';
 import '../screens/newMatch_screen.dart';
+import '../provider/manager.dart';
 
 class SideMenuWidget extends StatefulWidget {
   const SideMenuWidget({super.key});
@@ -14,43 +14,59 @@ class SideMenuWidget extends StatefulWidget {
 }
 
 class _SideMenuWidgetState extends State<SideMenuWidget> {
-  final sports = ['Soccer', 'Jump System'];
 
   @override
   Widget build(BuildContext context) {
-    final data = SideMenuData();
-    final st = Provider.of<Manager>(context);
-    final dropMenuController = TextEditingController(text: st.sport);
+  final data = SideMenuData();
+  final manager = Provider.of<Manager>(context);
     return Column(
       children: [
-        // Padding(
-        //   padding: const EdgeInsets.only(left: 10, right: 10, top: 13),
-        //   child: DropdownMenu(
-        //     dropdownMenuEntries: sports
-        //         .map((op) => DropdownMenuEntry(value: op, label: op))
-        //         .toList(),
-        //     expandedInsets: EdgeInsets.zero,
-        //     label: const Text('Select the Sport'),
-        //     controller: dropMenuController,
-        //     onSelected: (value) {
-        //       if (value != null) {
-        //         showDialog(context: context, builder: (context) => NewmatchScreen(selectedSport: value));
-        //       }
-        //     }
-        //   ),
-        // ),
-        // TextButton(
-        //   onPressed: () => showDialog(context: context, builder: (context) => const NewmatchScreen()),
-        //   child: const Text("Novo Evento"),
-        // ),
+        manager.selectedMatch == null ?
         Expanded(
           child: ListView.builder(
             itemCount: data.menu.length,
             itemBuilder: (context, index) => buildMenuEntry(data, index),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           ),
+        ):
+// ---------- ELSE ---------- //  
+        Container(
+      height: 47,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.all(
+          Radius.circular(5.0),
         ),
-        st.battery == 0
+        color: Colors.transparent,
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      child: InkWell(
+        borderRadius: const BorderRadius.all(Radius.circular(5.0)),
+        onTap: () => setState(() {
+          manager.selectMatch(null);
+        }),
+        child: const Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.grey,
+              ),
+            ),
+            Text(
+              "Voltar",
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+                fontWeight: FontWeight.normal,
+              ),
+            )
+          ],
+        ),
+      ),
+    )
+        ,
+        manager.battery == 0
             ? const SizedBox()
             : Expanded(
                 child: Column(
@@ -63,7 +79,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                         children: [
                           const Icon(Icons.battery_4_bar),
                           const SizedBox(width: 10),
-                          Text('${st.battery}%'),
+                          Text('${manager.battery}%'),
                         ],
                       ),
                     ),
@@ -88,11 +104,11 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         onTap: () => setState(() {
           print(data.menu[index].title);
-          if(data.menu[index].title == "Players"){
+          if(data.menu[index].title == "Atletas"){
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const PlayersScreen()),
             );
-          } else if(data.menu[index].title == "Fields"){
+          } else if(data.menu[index].title == "Campos"){
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const FieldsScreen()),
             );

@@ -348,7 +348,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                           borderRadius: BorderRadius.circular(10))),
                       elevation: const WidgetStatePropertyAll(5)),
                   child: const Text('Gyroscope')),
-              st.sport == 'Soccer'
+              st.sport == 'Futebol'
                   ? RadioMenuButton(
                       value: 'Heat',
                       groupValue: func,

@@ -21,6 +21,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
   @override
   Widget build(BuildContext context) {
     final manager = Provider.of<Manager>(context);
+    final selectedMatch = manager.selectedMatch;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,29 +35,22 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 prefixIcon: Icon(Icons.sports_score),
                 border: OutlineInputBorder(),
               ),
+              initialValue: selectedMatch?.description ?? '',
+              readOnly: true,
             ),
           ),
         ),
-        manager.sport == 'Soccer'
+        manager.sport == 'Futebol'
             ? Expanded(
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: DropdownButtonFormField(
+                  child: TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Select Field',
+                      labelText: 'Selected Field',
                       border: OutlineInputBorder(),
                     ),
-                    items: manager.fields.map((field) {
-                      return DropdownMenuItem(
-                        value: field,
-                        child: Text(field.name),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        manager.selectField(value);
-                      }
-                    },
+                    initialValue: selectedMatch?.field?.name ?? '',
+                    readOnly: true,
                   ),
                 ),
               )
@@ -63,22 +58,13 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         Expanded(
           child: Container(
             padding: const EdgeInsets.only(left: 5, right: 10),
-            child: DropdownButtonFormField(
+            child: TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Select Player',
+                labelText: 'Selected Player',
                 border: OutlineInputBorder(),
               ),
-              items: manager.players.map((player) {
-                return DropdownMenuItem(
-                  value: player,
-                  child: Text(player.name),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) {
-                  manager.selectPlayer(value);
-                }
-              },
+              initialValue: selectedMatch?.player?.name ?? '',
+              readOnly: true,
             ),
           ),
         ),
