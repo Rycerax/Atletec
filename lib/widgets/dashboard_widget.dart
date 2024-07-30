@@ -12,14 +12,22 @@ class Dashboardwidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
     return st.selectedMatch == null
-        ? Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                'lib/images/logo.jpg',
-              ),
-            ),
-          )
+        ? Container(
+          color: Colors.white,
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text('Projeto ATLETEC', style: TextStyle(fontSize: 50, color: Color(0xFF15131C), fontWeight: FontWeight.bold)),
+                const SizedBox(height: 100,),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'lib/images/Logo.png',
+                    height: 250,
+                  ),
+                ),
+            ]),
+        )
         : Column(
             children: [
               Container(
