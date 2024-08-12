@@ -4,6 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:atletec/model/player.dart';
 import 'package:atletec/model/field.dart';
 import 'package:atletec/model/match.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class Manager with ChangeNotifier {
   String _sport = '';
@@ -27,6 +28,7 @@ class Manager with ChangeNotifier {
     _playerBox = await Hive.openBox<Player>('players');
     _fieldBox = await Hive.openBox<Field>('fields');
     _matchBox = await Hive.openBox<Match>('matches');
+    notifyListeners();
   }
 
   List<Player> get players => _playerBox.values.toList();
@@ -117,6 +119,7 @@ class Manager with ChangeNotifier {
   void addMatch(Match match) {
     _matchBox.add(match);
     notifyListeners();
+    print("adicionou a partida");
   }
 
   void removeMatch(int id) {

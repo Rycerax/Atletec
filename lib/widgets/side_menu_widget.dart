@@ -1,4 +1,5 @@
 import 'package:atletec/data/side_menu_data.dart';
+import 'package:atletec/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/players_screen.dart';
@@ -114,6 +115,10 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
             );
           } else if (data.menu[index].title == "Novo Evento"){
             showDialog(context: context, builder: (context) => NewmatchScreen());
+          } else if (data.menu[index].title == 'Histórico') {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const HistoryScreen()),
+            );
           }
         }),
         child: Row(

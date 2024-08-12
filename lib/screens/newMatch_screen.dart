@@ -45,17 +45,14 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Nome'),
             ),
-            const SizedBox(height: 16), // Espaçamento entre os widgets
             TextField(
               controller: dateController,
               decoration: const InputDecoration(labelText: 'Data'),
             ),
-            const SizedBox(height: 16), // Espaçamento entre os widgets
             TextField(
               controller: descriptionController,
               decoration: const InputDecoration(labelText: 'Descrição'),
             ),
-            const SizedBox(height: 16), // Espaçamento entre os widgets
             DropdownButtonFormField(
               decoration: const InputDecoration(
                 labelText: 'Selecione o Campo',
@@ -73,7 +70,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 });
               },
             ),
-            const SizedBox(height: 16), // Espaçamento entre os widgets
             DropdownButtonFormField(
               decoration: const InputDecoration(
                 labelText: 'Selecione o Esporte',
@@ -91,7 +87,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 });
               },
             ),
-            const SizedBox(height: 16), // Espaçamento entre os widgets
             DropdownButtonFormField(
               decoration: const InputDecoration(
                 labelText: 'Selecione o Atleta',
@@ -115,8 +110,7 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
       actions: [
         TextButton(
           onPressed: () {
-            manager.updateSport('');
-            Navigator.of(context).pop();
+            Navigator.of(context).pop();  // Cancela e retorna
           },
           child: const Text('Cancel'),
         ),
@@ -128,20 +122,20 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 selectedSport != "" &&
                 manager.selectedField != null &&
                 manager.selectedPlayer != null) {
-                
+
               final newMatch = Match(
                 id: manager.getNextMatchId(),
                 name: nameController.text,
                 date: dateController.text,
-                sport: selectedSport!,
                 description: descriptionController.text,
-                player: manager.selectedPlayer!,
-                field: manager.selectedField!,
+                sport: selectedSport!,
+                player: manager.selectedPlayer,
+                field: manager.selectedField,
               );
               manager.addMatch(newMatch);
-              manager.updateSport(selectedSport!);
-              manager.selectMatch(newMatch);
-              Navigator.of(context).pop();
+              manager.selectMatch(newMatch);  // Seleciona a partida recém-criada
+              
+              Navigator.of(context).pop();  // Retorna para a tela anterior apenas se a partida for salva
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Por favor, preencha todos os campos.')),
