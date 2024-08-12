@@ -51,7 +51,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     previewImage = Image.file(imgFile!);
     setState(() {
       imageCache.clear();
-      imageCache.clearLiveImages(); 
+      imageCache.clearLiveImages();
     });
     resetData();
   }
@@ -71,7 +71,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM4');
+    port = SerialPort('COM3');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -122,7 +122,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       }),
     );
 
-    if(res.statusCode == 200){
+    if (res.statusCode == 200) {
       setState(() {
         imageCache.clear();
         imageCache.clearLiveImages();
@@ -166,19 +166,19 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return byteData.getFloat64(0, Endian.big);
   }
 
-  // int _bytesToInt(List<int> bytes) {
-  //   if (bytes.length != 4) {
-  //     throw ArgumentError(
-  //         'A lista de bytes deve conter exatamente 4 elementos.');
-  //   }
+  int _bytesToInt(List<int> bytes) {
+    if (bytes.length != 4) {
+      throw ArgumentError(
+          'A lista de bytes deve conter exatamente 4 elementos.');
+    }
 
-  //   ByteData byteData = ByteData(4);
-  //   for (int i = 0; i < 4; i++) {
-  //     byteData.setUint8(i, bytes[i]);
-  //   }
+    ByteData byteData = ByteData(4);
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, bytes[i]);
+    }
 
-  //   return byteData.getInt32(0, Endian.big);
-  // }
+    return byteData.getInt32(0, Endian.big);
+  }
 
   void _stopListening() {
     subscription?.cancel();
@@ -242,7 +242,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Uint8List newData = Uint8List.fromList(buffer);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
-              _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
+              _saveCoordinates(
+                  _bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));
             }
