@@ -134,6 +134,7 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
               );
               manager.addMatch(newMatch);
               manager.selectMatch(newMatch);  // Seleciona a partida recém-criada
+              manager.updatedIsMatch(true);
               
               Navigator.of(context).pop();  // Retorna para a tela anterior apenas se a partida for salva
             } else {

@@ -22,15 +22,16 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
   final manager = Provider.of<Manager>(context);
     return Column(
       children: [
-        manager.selectedMatch == null ?
+        !manager.isMatch
+        ?
         Expanded(
           child: ListView.builder(
             itemCount: data.menu.length,
             itemBuilder: (context, index) => buildMenuEntry(data, index),
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           ),
-        ):
-// ---------- ELSE ---------- //  
+        )
+        :
         Container(
       height: 47,
       decoration: const BoxDecoration(
@@ -44,6 +45,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
         onTap: () => setState(() {
           manager.selectMatch(null);
+          manager.updatedIsMatch(false);
         }),
         child: const Row(
           children: [

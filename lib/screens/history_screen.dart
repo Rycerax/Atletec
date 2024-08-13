@@ -1,8 +1,6 @@
 import 'package:atletec/provider/manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
-import 'package:atletec/model/match.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});

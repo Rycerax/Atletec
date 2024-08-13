@@ -15,7 +15,7 @@ class Manager with ChangeNotifier {
   Player? _selectedPlayer;
   Field? _selectedField;
   Match? _selectedMatch;
-
+  bool _isMatch = false;
   late Box<Player> _playerBox;
   late Box<Field> _fieldBox;
   late Box<Match> _matchBox;
@@ -41,7 +41,7 @@ class Manager with ChangeNotifier {
 
   String get func => _func;
   String get sport => _sport;
-
+  bool get isMatch => _isMatch;
   int get battery => _battery;
 
   void addPlayer(Player player) {
@@ -176,5 +176,9 @@ class Manager with ChangeNotifier {
     port = portName;
     print(port);
     notifyListeners();
+  }
+
+  void updatedIsMatch(bool isMatch){
+    this._isMatch = isMatch;
   }
 }

@@ -10,7 +10,7 @@ class Dashboardwidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
-    return st.matches.isEmpty
+    return !st.isMatch
         ? Container(
             color: Colors.white,
             child:
