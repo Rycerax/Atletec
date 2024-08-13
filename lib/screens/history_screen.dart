@@ -26,6 +26,7 @@ class HistoryScreen extends StatelessWidget {
               trailing: Text(match.date),
               onTap: () {
                 // Ação ao clicar no card (ex: exibir detalhes da partida)
+                manager.removeMatch(match.id);
               },
             ),
           );

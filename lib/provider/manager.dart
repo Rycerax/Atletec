@@ -28,6 +28,7 @@ class Manager with ChangeNotifier {
   }
 
   Future<void> _init() async {
+    Hive.registerAdapter(MatchAdapter());
     _playerBox = await Hive.openBox<Player>('players');
     _fieldBox = await Hive.openBox<Field>('fields');
     _matchBox = await Hive.openBox<Match>('matches');

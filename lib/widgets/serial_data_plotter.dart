@@ -428,7 +428,14 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               : Center(
                   child: imgFile == null
                       ? const Placeholder()
-                      : Image.file(imgFile!, key: ValueKey(imgKey))),
+                      : AspectRatio(
+                          aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
+                          child: FittedBox(
+                            fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
+                            child: Image.file(imgFile!, key: ValueKey(imgKey)),
+                          ),
+                        ),
+                ),
           Center(
             child: IconButton(
               iconSize: 35,

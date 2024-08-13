@@ -33,8 +33,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         )
         :
         Container(
-      height: 47,
-      decoration: const BoxDecoration(
+        height: 47,
+        decoration: const BoxDecoration(
         borderRadius: BorderRadius.all(
           Radius.circular(5.0),
         ),
@@ -43,10 +43,11 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
       margin: const EdgeInsets.symmetric(vertical: 3),
       child: InkWell(
         borderRadius: const BorderRadius.all(Radius.circular(5.0)),
-        onTap: () => setState(() {
+        onTap: () {
           manager.selectMatch(null);
           manager.updatedIsMatch(false);
-        }),
+        }
+        ,
         child: const Row(
           children: [
             Padding(
