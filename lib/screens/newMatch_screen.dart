@@ -129,8 +129,8 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 date: dateController.text,
                 description: descriptionController.text,
                 sport: selectedSport!,
-                player: manager.selectedPlayer,
-                field: manager.selectedField,
+                playerId: manager.selectedPlayer!.id,
+                fieldId: manager.selectedField!.id,
               );
               manager.addMatch(newMatch);
               manager.selectMatch(newMatch);  // Seleciona a partida recém-criada

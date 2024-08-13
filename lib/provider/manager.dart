@@ -12,10 +12,13 @@ class Manager with ChangeNotifier {
   List<String> ports = [];
   String? port;
   int _battery = 0;
+
   Player? _selectedPlayer;
   Field? _selectedField;
   Match? _selectedMatch;
+
   bool _isMatch = false;
+  
   late Box<Player> _playerBox;
   late Box<Field> _fieldBox;
   late Box<Match> _matchBox;
@@ -75,6 +78,10 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
+  Player getPlayerbyId(int id){
+    return _playerBox.values.firstWhere((player) => player.id == id);
+  }
+
   int getNextPlayerId() {
     if (_playerBox.isEmpty) {
       return 1;
@@ -108,6 +115,10 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
+  Field getFieldbyId(int id){
+    return _fieldBox.values.firstWhere((field) => field.id == id);
+  }
+
   int getNextFieldId() {
     if (_fieldBox.isEmpty) {
       return 1;
@@ -117,9 +128,10 @@ class Manager with ChangeNotifier {
   }
 
   void addMatch(Match match) {
+    print(_matchBox.isEmpty);
     _matchBox.add(match);
     notifyListeners();
-    print("adicionou a partida");
+    print(_matchBox.isEmpty);
   }
 
   void removeMatch(int id) {
@@ -131,10 +143,10 @@ class Manager with ChangeNotifier {
 
   void updateMatch(Match updatedMatch) {
     final match = _matchBox.values.firstWhere((match) => match.id == updatedMatch.id);
-    match.field = updatedMatch.field;
+    match.fieldId = updatedMatch.fieldId;
     match.name = updatedMatch.name;
     match.description = updatedMatch.description;
-    match.player = updatedMatch.player;
+    match.playerId = updatedMatch.playerId;
     match.save();
     notifyListeners();
   }

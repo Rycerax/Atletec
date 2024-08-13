@@ -1,6 +1,4 @@
 import 'package:hive/hive.dart';
-import './player.dart';
-import './field.dart';
 
 part 'match.g.dart';
 
@@ -22,17 +20,17 @@ class Match extends HiveObject{
   String sport;
 
   @HiveField(5)
-  Player? player;
+  int playerId;
 
   @HiveField(6)
-  Field? field;
+  int fieldId;
 
   Match({required this.id, 
   required this.name, 
   required this.description, 
   required this.date,
   required this.sport,
-  required this.player, 
-  required this.field});
+  required this.playerId, 
+  required this.fieldId});
 
 }

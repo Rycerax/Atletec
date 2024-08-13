@@ -71,7 +71,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM3');
+    port = SerialPort('COM7');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -349,7 +349,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                           borderRadius: BorderRadius.circular(10))),
                       elevation: const WidgetStatePropertyAll(5)),
                   child: const Text('Gyroscope')),
-              st.sport == 'Futebol'
+              st.selectedMatch!.sport == 'Futebol'
                   ? RadioMenuButton(
                       value: 'Heat',
                       groupValue: func,

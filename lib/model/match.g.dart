@@ -22,8 +22,8 @@ class MatchAdapter extends TypeAdapter<Match> {
       description: fields[2] as String,
       date: fields[3] as String,
       sport: fields[4] as String,
-      player: fields[5] as Player?,
-      field: fields[6] as Field?,
+      playerId: fields[5] as int,
+      fieldId: fields[6] as int,
     );
   }
 
@@ -42,9 +42,9 @@ class MatchAdapter extends TypeAdapter<Match> {
       ..writeByte(4)
       ..write(obj.sport)
       ..writeByte(5)
-      ..write(obj.player)
+      ..write(obj.playerId)
       ..writeByte(6)
-      ..write(obj.field);
+      ..write(obj.fieldId);
   }
 
   @override
