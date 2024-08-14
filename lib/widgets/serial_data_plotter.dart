@@ -96,7 +96,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM5');
+    port = SerialPort('COM7');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -132,6 +132,18 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       val -= 0x10000;
     }
     return val;
+  }
+
+  Future<void> setNewCoordinates() async {
+    String newCoordinates = Provider.of<Manager>(context, listen: false).selectedField!.coordinates;
+    final url = Uri.parse('http://127.0.0.1:5000/atualizar_coordenadas');
+
+    final response = await http.post(url, headers: {'Content-Type': "application/json"}, body: jsonEncode({'coordenadas': newCoordinates}));
+    if(response.statusCode == 200){
+      print("Coordenadas atualizadas com sucesso");
+    } else {
+      print("Falha ao configurar as novas coordenadas");
+    } 
   }
 
   void _saveCoordinates(double lat, double long) async {
@@ -221,6 +233,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       print('Broadcast Stream is null!');
       return;
     }
+
+    setNewCoordinates();
     // File dataFile = File("C:/Users/rafae/Projects/atletec/games/game$fileCounter.txt");
     // fileCounter++;
     // await dataFile.create();
@@ -284,8 +298,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
               writeData(['ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
-              _saveCoordinates(
-                  _bytesToDouble(latBytes), _bytesToDouble(longBytes));
+              _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));
             }

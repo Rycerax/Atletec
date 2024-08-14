@@ -6,6 +6,21 @@ import '../model/field.dart';
 class FieldsScreen extends StatelessWidget {
   const FieldsScreen({super.key});
 
+  bool isValidCoordinates(String coordinates) {
+    final parts = coordinates.split(',');
+    if (parts.length != 8) {
+      return false;
+    }
+    try {
+      for (var part in parts) {
+        double.parse(part.trim());
+      }
+    } catch (e) {
+      return false;
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final manager = Provider.of<Manager>(context);
@@ -117,10 +132,19 @@ class FieldsScreen extends StatelessWidget {
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Nome'),
               ),
-              TextField(
-                controller: coordinatesController,
-                decoration: const InputDecoration(labelText: 'Coordenadas (lat1, long1...)'),
-              ),
+              SizedBox(
+                width: 250,  // Define a largura fixa para o TextField
+                child: TextField(
+                  controller: coordinatesController,
+                  maxLines: 1,  // Garante que o TextField tenha apenas uma linha
+                  decoration: const InputDecoration(
+                    hintText: 'lat1, long1, lat2, long2...',
+                  ),
+                  style: const TextStyle(
+                    overflow: TextOverflow.ellipsis,  // Faz o texto afastar para o lado
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -137,19 +161,29 @@ class FieldsScreen extends StatelessWidget {
               final coordinates = coordinatesController.text;
 
               if (field == null) {
-                final newField = Field(
-                  id: manager.getNextFieldId(),
-                  name: name,
-                  coordinates: coordinates,
-                );
-                manager.addField(newField);
+                if(isValidCoordinates(coordinates)){
+                  final newField = Field(
+                    id: manager.getNextFieldId(),
+                    name: name,
+                    coordinates: coordinates,
+                  );
+                  manager.addField(newField);
+                  Navigator.of(context).pop();
+                } else {
+                  _showMessage(context, "As Coordenadas devem seguir o exemplo: lat1, long1, lat2, long2...");
+                }
               } else {
-                field.name = name;
-                field.coordinates = coordinates;
-                manager.updateField(field);
+                if(isValidCoordinates(coordinates)){
+                  field.name = name;
+                  field.coordinates = coordinates;
+                  manager.updateField(field);
+                  Navigator.of(context).pop();
+                } else {
+                  _showMessage(context, "As Coordenadas devem seguir o exemplo: lat1, long1, lat2, long2...");
+                }
               }
 
-              Navigator.of(context).pop();
+              
             },
             child: Text(field == null ? 'Adicionar' : 'Salvar'),
           ),
