@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'package:atletec/provider/manager.dart';
+import 'package:csv/csv.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
@@ -17,6 +20,7 @@ class SerialDataPlotter extends StatefulWidget {
 
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
   // final SerialService _serialService = SerialService();
+  
   SerialPort? port;
   String imgUrl = 'lib/images/heatmap.png';
   final config = SerialPortConfig();
@@ -54,6 +58,27 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       imageCache.clearLiveImages();
     });
     resetData();
+    writeData(['xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+  }
+
+  Future<File> writeData(List<dynamic> data, String filename) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/AtletecData';
+    List<List<dynamic>> rows = [data];
+    final dir = Directory(path);
+    if(!await dir.exists()){
+      await dir.create(recursive: true);
+    }
+    final file = File('$path/$filename');
+
+    String csvData = const ListToCsvConverter().convert(rows);
+
+    if(await file.exists()){
+      await file.writeAsString('\n$csvData', mode: FileMode.append, flush: true);
+    } else {
+      await file.writeAsString(csvData, mode: FileMode.write, flush: true);
+    }
+    return file;
   }
 
   void resetData() async {
@@ -71,7 +96,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _initPort(BuildContext context) {
-    port = SerialPort('COM7');
+    port = SerialPort('COM5');
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
       config.bits = 8;
@@ -212,11 +237,27 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Provider.of<Manager>(context, listen: false)
                   .updateBattery(buffer.elementAt(8));
             } else if (buffer.elementAt(1) == 1) {
+              double xg = 0.0, yg = 0.0, zg = 0.0, xa = 0.0, ya = 0.0, za = 0.0;
               while (_accelxPoints.length > 500) {
                 _accelxPoints.removeAt(0);
                 _accelyPoints.removeAt(0);
                 _accelzPoints.removeAt(0);
               }
+              for (var i = 8; i < buffer.length - 4; i += 12) {
+                xg += bytesToInt(buffer.elementAt(i), buffer.elementAt(i + 1)).toDouble();
+                yg += bytesToInt(buffer.elementAt(i + 2), buffer.elementAt(i + 3)).toDouble();
+                zg += bytesToInt(buffer.elementAt(i + 4), buffer.elementAt(i + 5)).toDouble();
+                xa += bytesToInt(buffer.elementAt(i + 6), buffer.elementAt(i + 7)).toDouble();
+                ya += bytesToInt(buffer.elementAt(i + 8), buffer.elementAt(i + 9)).toDouble();
+                za += bytesToInt(buffer.elementAt(i + 10), buffer.elementAt(i + 11)).toDouble();
+              }
+              xg /= 20.0;
+              yg /= 20.0;
+              zg /= 20.0;
+              xa /= 20.0;
+              ya /= 20.0;
+              za /= 20.0;
+              writeData([xg, yg, zg, xa, ya, za, 'ND', 'ND'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
                   _accelxPoints.add(FlSpot(
@@ -225,8 +266,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                           .toDouble()));
                   _accelyPoints.add(FlSpot(
                       _counter.toDouble(),
-                      bytesToInt(
-                              buffer.elementAt(i + 2), buffer.elementAt(i + 3))
+                      bytesToInt(buffer.elementAt(i + 2), buffer.elementAt(i + 3))
                           .toDouble()));
                   _accelzPoints.add(FlSpot(
                       _counter.toDouble(),
@@ -239,9 +279,11 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // buffer = _parseData(buffer);
               // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
+              Provider.of<Manager>(context, listen: false).updateGPS(true);
               Uint8List newData = Uint8List.fromList(buffer);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
+              writeData(['ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
               _saveCoordinates(
                   _bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));

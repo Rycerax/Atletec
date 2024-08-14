@@ -12,6 +12,7 @@ class Manager with ChangeNotifier {
   List<String> ports = [];
   String? port;
   int _battery = 0;
+  bool _gps = false;
 
   Player? _selectedPlayer;
   Field? _selectedField;
@@ -46,6 +47,7 @@ class Manager with ChangeNotifier {
   String get func => _func;
   String get sport => _sport;
   bool get isMatch => _isMatch;
+  bool get gps => _gps; 
   int get battery => _battery;
 
   void addPlayer(Player player) {
@@ -192,6 +194,12 @@ class Manager with ChangeNotifier {
   }
 
   void updatedIsMatch(bool isMatch){
-    this._isMatch = isMatch;
+    _isMatch = isMatch;
+    notifyListeners();
+  }
+
+  void updateGPS(bool gps){
+    _gps = gps;
+    notifyListeners();
   }
 }

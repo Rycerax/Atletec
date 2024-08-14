@@ -81,6 +81,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          manager.gps ? const Icon(Icons.gps_fixed) : const Icon(Icons.gps_off),
                           const Icon(Icons.battery_4_bar),
                           const SizedBox(width: 10),
                           Text('${manager.battery}%'),
