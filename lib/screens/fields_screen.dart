@@ -79,10 +79,13 @@ class FieldsScreen extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () {
+                  onPressed: () async {
                     final selectedField = manager.selectedField;
                     if (selectedField != null) {
-                      manager.removeField(selectedField.id);
+                      final confirmDelete = await _confirmDelete(context);
+                      if(confirmDelete){
+                        manager.removeField(selectedField.id);
+                      }
                     } else {
                       _showMessage(context, 'Selecione um campo para excluir.');
                     }
@@ -115,6 +118,26 @@ class FieldsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  Future<bool> _confirmDelete(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: const Text('Você tem certeza que deseja excluir este campo e seus dados?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    ).then((value) => value ?? false);
   }
 
   void _showFieldDialog(BuildContext context, Manager manager, Field? field) {

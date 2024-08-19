@@ -64,6 +64,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   Future<File> writeData(List<dynamic> data, String filename) async {
     final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/AtletecData';
+    print("path do serial_data_plotter:  $path");
     List<List<dynamic>> rows = [data];
     final dir = Directory(path);
     if(!await dir.exists()){

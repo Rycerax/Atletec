@@ -64,10 +64,13 @@ class PlayersScreen extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
-                  onPressed: () {
+                  onPressed: () async {
                     final selectedPlayer = manager.selectedPlayer;
                     if (selectedPlayer != null) {
-                      manager.removePlayer(selectedPlayer.id);
+                      final confirmDelete = await _confirmDelete(context);
+                      if (confirmDelete) {
+                        manager.removePlayer(selectedPlayer.id);
+                      }
                     } else {
                       _showMessage(context, 'Selecione um jogador para excluir.');
                     }
@@ -100,6 +103,26 @@ class PlayersScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<bool> _confirmDelete(BuildContext context) async {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: const Text('Você tem certeza que deseja excluir este jogador e seus dados?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    ).then((value) => value ?? false);
   }
 
   void _showPlayerDialog(BuildContext context, Manager manager, Player? player) {
