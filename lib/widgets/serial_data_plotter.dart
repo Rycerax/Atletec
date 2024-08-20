@@ -41,6 +41,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   File? imgFile;
   Image? previewImage;
   int imgKey = 0;
+  int _secondsElapsed = 0;
+  bool _isRunning = false;
   @override
   void initState() {
     super.initState();
@@ -59,6 +61,12 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     });
     resetData();
     writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+  }
+
+  String formatTime(int seconds){
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
   Future<File> writeData(List<dynamic> data, String filename) async {
@@ -218,6 +226,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _stopListening() {
+    _timer?.cancel();
     subscription?.cancel();
     subscription = null;
     resetData();
@@ -229,6 +238,12 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _startListening(BuildContext context) async {
+    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+      setState(() {
+        _secondsElapsed++;
+      });
+    });
+
     if (broadcastStream == null) {
       print('Broadcast Stream is null!');
       return;
@@ -491,23 +506,27 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                           ),
                         ),
                 ),
-          Center(
-            child: IconButton(
-              iconSize: 35,
-              icon: playing
-                  ? const Icon(Icons.stop_circle_rounded)
-                  : const Icon(Icons.play_circle_filled_rounded),
-              onPressed: () {
-                if (playing) {
-                  _stopListening();
-                } else {
-                  _initPort(context);
-                }
-                setState(() {
-                  playing = !playing;
-                });
-              },
-            ),
+          Row(
+            children: [
+              IconButton(
+                iconSize: 35,
+                icon: playing
+                    ? const Icon(Icons.stop_circle_rounded)
+                    : const Icon(Icons.play_circle_filled_rounded),
+                onPressed: () {
+                  if (playing) {
+                    _stopListening();
+                  } else {
+                    _initPort(context);
+                  }
+                  setState(() {
+                    playing = !playing;
+                  });
+                },
+              ),
+              const SizedBox(width: 20),
+              Text(formatTime(_secondsElapsed), style: const TextStyle(fontSize: 24, color: Colors.white))
+            ]
           )
         ],
       );

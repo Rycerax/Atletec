@@ -16,6 +16,13 @@ class HistoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Histórico de Partidas'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            manager.selectMatch(null);
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: Row(
         children: [
@@ -117,6 +124,7 @@ class HistoryScreen extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () {
+                manager.selectMatch(null);
                 Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
@@ -124,6 +132,7 @@ class HistoryScreen extends StatelessWidget {
             const SizedBox(width: 10),
             ElevatedButton(
               onPressed: () {
+                manager.selectMatch(null);
                 Navigator.of(context).pop();
               },
               child: const Text('OK'),

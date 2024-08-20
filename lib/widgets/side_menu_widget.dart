@@ -48,6 +48,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           manager.selectMatch(null);
           manager.updatedIsMatch(false);
           manager.updateBattery(0);
+          manager.updateGPS(false);
         }
         ,
         child: const Row(
@@ -84,9 +85,9 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           manager.gps ? const Icon(Icons.gps_fixed, color: Colors.green,) : const Icon(Icons.gps_off, color: Colors.red,),
-                          const Icon(Icons.battery_4_bar),
+                          manager.battery == 0 ? const Icon(Icons.battery_4_bar, color: Colors.red,) : const Icon(Icons.battery_4_bar),
                           const SizedBox(width: 10),
-                          Text('${manager.battery}%'),
+                          manager.battery != 0 ? Text('${manager.battery}%') : const Text(''),
                         ],
                       ),
                     ),
