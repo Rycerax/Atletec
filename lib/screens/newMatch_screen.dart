@@ -9,7 +9,6 @@ class NewmatchScreen extends StatefulWidget {
 }
 
 class _NewmatchScreenState extends State<NewmatchScreen> {
-  late TextEditingController dateController;
   late TextEditingController nameController;
   late TextEditingController descriptionController;
   final sportsList = ['Futebol', 'Jump System'];
@@ -18,7 +17,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
   @override
   void initState() {
     super.initState();
-    dateController = TextEditingController();
     nameController = TextEditingController();
     descriptionController = TextEditingController();
     selectedSport = '';
@@ -26,7 +24,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
 
   @override
   void dispose() {
-    dateController.dispose();
     nameController.dispose();
     descriptionController.dispose();
     super.dispose();
@@ -44,10 +41,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
             TextField(
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Nome'),
-            ),
-            TextField(
-              controller: dateController,
-              decoration: const InputDecoration(labelText: 'Data'),
             ),
             TextField(
               controller: descriptionController,
@@ -117,16 +110,15 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
         ElevatedButton(
           onPressed: () {
             if (nameController.text.isNotEmpty &&
-                dateController.text.isNotEmpty &&
                 descriptionController.text.isNotEmpty &&
                 selectedSport != "" &&
                 manager.selectedField != null &&
                 manager.selectedPlayer != null) {
-
+              String dataString = "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
               final newMatch = Match(
                 id: manager.getNextMatchId(),
                 name: nameController.text,
-                date: dateController.text,
+                date: dataString,
                 description: descriptionController.text,
                 sport: selectedSport!,
                 playerId: manager.selectedPlayer!.id,
