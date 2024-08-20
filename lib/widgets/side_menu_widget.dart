@@ -121,7 +121,17 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
               MaterialPageRoute(builder: (context) => const FieldsScreen()),
             );
           } else if (data.menu[index].title == "Novo Evento"){
-            showDialog(context: context, builder: (context) => NewmatchScreen());
+            if(Provider.of<Manager>(context, listen: false).port != null){
+              showDialog(context: context, builder: (context) => NewmatchScreen());
+            } else {
+              showDialog<bool>(context: context, builder: (context) => AlertDialog(
+                title: const Text('Porta COM não Selecionada!'),
+                content: const Text('Selecione uma porta COM em "Configurações" para criar um novo evento.'),
+                actions: [
+                  ElevatedButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('OK'))
+                ],
+              ),);
+            }
           } else if (data.menu[index].title == 'Histórico') {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const HistoryScreen()),
