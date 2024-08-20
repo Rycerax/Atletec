@@ -85,11 +85,10 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return path;
   }
 
-  File writeData(List<dynamic> data) {
+  void writeData(List<dynamic> data) {
     List<List<dynamic>> rows = [data];
     String csvData = const ListToCsvConverter().convert(rows);
     file.writeAsString('\n$csvData', mode: FileMode.append, flush: true);
-    return file;
   }
 
   void resetData() async {
@@ -214,20 +213,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return byteData.getFloat64(0, Endian.big);
   }
 
-  int _bytesToInt(List<int> bytes) {
-    if (bytes.length != 4) {
-      throw ArgumentError(
-          'A lista de bytes deve conter exatamente 4 elementos.');
-    }
-
-    ByteData byteData = ByteData(4);
-    for (int i = 0; i < 4; i++) {
-      byteData.setUint8(i, bytes[i]);
-    }
-
-    return byteData.getInt32(0, Endian.big);
-  }
-
   void _stopListening() {
     _timer?.cancel();
     subscription?.cancel();
@@ -257,7 +242,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     // fileCounter++;
     // await dataFile.create();
     subscription = reader!.stream.listen(
-      (data) async {
+      (data) {
         for (var byte in data) {
           buffer.add(byte);
           // print(buffer);
@@ -510,6 +495,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                         ),
                 ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
                 iconSize: 35,

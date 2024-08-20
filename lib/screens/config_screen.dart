@@ -34,7 +34,7 @@ class _ConfigScreenState extends State<ConfigScreen> {
   Widget build(BuildContext context) {
     final manager = Provider.of<Manager>(context);
     return AlertDialog(
-      title: const Text('Configuração'),
+      title: const Text('Configurações'),
       content: SingleChildScrollView(
         child: Column(
           children: [
