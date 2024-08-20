@@ -43,6 +43,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int imgKey = 0;
   int _secondsElapsed = 0;
   bool _isRunning = false;
+  String filePath = '';
+  File file = File('');
   @override
   void initState() {
     super.initState();
@@ -60,7 +62,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       imageCache.clearLiveImages();
     });
     resetData();
-    writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+    getAppDirect();
+    // writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
   }
 
   String formatTime(int seconds){
@@ -69,23 +72,23 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 
-  Future<File> writeData(List<dynamic> data, String filename) async {
+  Future<String> getAppDirect() async{
     final directory = await getApplicationDocumentsDirectory();
     final path = '${directory.path}/AtletecData';
-    List<List<dynamic>> rows = [data];
     final dir = Directory(path);
     if(!await dir.exists()){
       await dir.create(recursive: true);
     }
-    final file = File('$path/$filename');
+    filePath = path;
+    file = await File('$filePath/dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv').create();
+    writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long']);
+    return path;
+  }
 
+  File writeData(List<dynamic> data) {
+    List<List<dynamic>> rows = [data];
     String csvData = const ListToCsvConverter().convert(rows);
-
-    if(await file.exists()){
-      await file.writeAsString('\n$csvData', mode: FileMode.append, flush: true);
-    } else {
-      await file.writeAsString(csvData, mode: FileMode.write, flush: true);
-    }
+    file.writeAsString('\n$csvData', mode: FileMode.append, flush: true);
     return file;
   }
 
@@ -286,7 +289,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               xa /= 20.0;
               ya /= 20.0;
               za /= 20.0;
-              writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+              writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND']);
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
                   _accelxPoints.add(FlSpot(
@@ -312,7 +315,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Uint8List newData = Uint8List.fromList(buffer);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
-              writeData(['ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+              writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));
