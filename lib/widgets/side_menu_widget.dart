@@ -1,4 +1,5 @@
 import 'package:atletec/data/side_menu_data.dart';
+import 'package:atletec/screens/config_screen.dart';
 import 'package:atletec/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -123,6 +124,8 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => const HistoryScreen()),
             );
+          } else {
+            showDialog(context: context, builder: (context) => const ConfigScreen());
           }
         }),
         child: Row(

@@ -9,7 +9,6 @@ import 'package:hive_flutter/hive_flutter.dart';
 class Manager with ChangeNotifier {
   String _sport = '';
   String _func = 'Accel';
-  List<String> ports = [];
   String? port;
   int _battery = 0;
   bool _gps = false;
@@ -179,11 +178,6 @@ class Manager with ChangeNotifier {
 
   void updateBattery(int btt) {
     _battery = btt;
-    notifyListeners();
-  }
-
-  void updatePorts() {
-    ports = SerialPort.availablePorts;
     notifyListeners();
   }
 

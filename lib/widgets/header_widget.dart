@@ -11,12 +11,6 @@ class HeaderWidget extends StatefulWidget {
 
 class _HeaderWidgetState extends State<HeaderWidget> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<Manager>(context, listen: false).updatePorts();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,16 +60,6 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               initialValue: manager.getPlayerbyId(selectedMatch!.playerId).name,
               readOnly: true,
             ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 10),
-          child: IconButton(
-            onPressed: () {
-              manager.updatePorts();
-            },
-            icon: const Icon(Icons.refresh),
-            iconSize: 33,
           ),
         ),
       ],
