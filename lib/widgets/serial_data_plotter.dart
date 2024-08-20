@@ -58,7 +58,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       imageCache.clearLiveImages();
     });
     resetData();
-    writeData(['xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+    writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
   }
 
   Future<File> writeData(List<dynamic> data, String filename) async {
@@ -271,7 +271,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               xa /= 20.0;
               ya /= 20.0;
               za /= 20.0;
-              writeData([xg, yg, zg, xa, ya, za, 'ND', 'ND'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
+              writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
                   _accelxPoints.add(FlSpot(
