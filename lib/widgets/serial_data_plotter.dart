@@ -40,11 +40,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int fileCounter = 0;
   File? imgFile;
   Image? previewImage;
-  int imgKey = 0;
+  // int imgKey = 0;
   int _secondsElapsed = 0;
   bool _isRunning = false;
   String filePath = '';
   File file = File('');
+  ValueNotifier<int> imgKeyNotifier = ValueNotifier(0); // Gerencia atualizações de imagem
+
   @override
   void initState() {
     super.initState();
@@ -171,10 +173,12 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
     if (res.statusCode == 200) {
       setState(() {
-        imageCache.clear();
-        imageCache.clearLiveImages();
-        imgKey ^= 1;
+        // imageCache.clear();
+        // imageCache.clearLiveImages();
+        // imgKey ^= 1;
+        imgFile = File('./lib/images/heatmap.png');
       });
+      imgKeyNotifier.value++; // Incrementa o valor para atualizar a imagem
     }
     // await Future.delayed(const Duration(seconds: 2));
     // print('Conexão encerrada.');
@@ -484,16 +488,37 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                     ),
                   ))
               : Center(
-                  child: imgFile == null
-                      ? const Placeholder()
-                      : AspectRatio(
-                          aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
-                          child: FittedBox(
-                            fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
-                            child: Image.file(imgFile!, key: ValueKey(imgKey)),
-                          ),
-                        ),
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: imgKeyNotifier,
+                    builder: (context, key, child) {
+                      return imgFile == null
+                          ? const Placeholder()
+                          : AspectRatio(
+                              aspectRatio: 2, // Ajuste a proporção do campo
+                              child: FittedBox(
+                                fit: BoxFit.contain,
+                                child: RepaintBoundary(
+                                  child: Image.file(
+                                    imgFile!,
+                                    key: ValueKey(key), // Atualiza a imagem apenas quando necessário
+                                  ),
+                                ),
+                              ),
+                            );
+                    },
+                  ),
                 ),
+              // : Center(
+              //     child: imgFile == null
+              //         ? const Placeholder()
+              //         : AspectRatio(
+              //             aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
+              //             child: FittedBox(
+              //               fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
+              //               child: Image.file(imgFile!, key: ValueKey(imgKey)),
+              //             ),
+              //           ),
+              //   ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
