@@ -5,6 +5,7 @@ import 'package:atletec/model/player.dart';
 import 'package:atletec/model/field.dart';
 import 'package:atletec/model/match.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:atletec/model/metricModel.dart';
 
 class Manager with ChangeNotifier {
   String _sport = '';
@@ -38,6 +39,7 @@ class Manager with ChangeNotifier {
   List<Player> get players => _playerBox.values.toList();
   List<Field> get fields => _fieldBox.values.toList();
   List<Match> get matches => _matchBox.values.toList();
+
 
   Player? get selectedPlayer => _selectedPlayer;
   Field? get selectedField => _selectedField;
@@ -196,4 +198,35 @@ class Manager with ChangeNotifier {
     _gps = gps;
     notifyListeners();
   }
+
+// ---------------------------------------- //
+// --------------- MÉTRICAS --------------- //
+// ---------------------------------------- //
+
+  final List<MetricModel> _metrics = [];  
+
+  List<MetricModel> get metrics => List.unmodifiable(_metrics);
+
+  void addMetric(String name) {
+    // Evita duplicar se já existir
+    if (_metrics.any((m) => m.name == name)) return;
+    _metrics.add(MetricModel(name: name));
+    notifyListeners();
+  }
+
+  void updateMetric(String name, double newValue) {
+    final metric = _metrics.firstWhere(
+      (m) => m.name == name,
+      orElse: () {
+        // se não encontrou, cria na hora
+        final newMetric = MetricModel(name: name);
+        _metrics.add(newMetric);
+        print("Nova métrica criada: " + name);
+        return newMetric;
+      },
+    );
+    metric.updateValue(newValue);
+    notifyListeners();
+  }
+
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:atletec/provider/manager.dart';
+import 'package:atletec/model/metricModel.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,6 @@ class SerialDataPlotter extends StatefulWidget {
 }
 
 class _SerialDataPlotterState extends State<SerialDataPlotter> {
-  // final SerialService _serialService = SerialService();
   
   SerialPort? port;
   String imgUrl = 'lib/images/heatmap.png';
@@ -40,7 +40,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int fileCounter = 0;
   File? imgFile;
   Image? previewImage;
-  // int imgKey = 0;
+  int imgKey = 0;
   int _secondsElapsed = 0;
   bool _isRunning = false;
   String filePath = '';
@@ -50,13 +50,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void initState() {
     super.initState();
-    // _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-    //   setState(() {
-    //     imageCache.clear();
-    //     imageCache.clearLiveImages();
-    //     imgKey ^= 1;
-    //   });
-    // });
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      setState(() {
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+      });
+    });
     imgFile = File('./lib/images/heatmap.png');
     previewImage = Image.file(imgFile!);
     setState(() {
@@ -65,7 +65,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     });
     resetData();
     getAppDirect();
-    // writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long'], 'dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv');
   }
 
   String formatTime(int seconds){
@@ -159,8 +158,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _saveCoordinates(double lat, double long) async {
-    // final socket = await Socket.connect('127.0.0.1', 65432);
-    // print('Conectado!');
     final res = await http.post(
       Uri.parse('http://127.0.0.1:5000/execute'),
       headers: {
@@ -180,36 +177,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       });
       imgKeyNotifier.value++; // Incrementa o valor para atualizar a imagem
     }
-    // await Future.delayed(const Duration(seconds: 2));
-    // print('Conexão encerrada.');
-    // final directory = await getApplicationDocumentsDirectory();
-    // final file = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
-    // File lockFile = File("C:/Users/rafae/Projects/atletec/file.lock");
-    // File dataFile = File("C:/Users/rafae/Projects/atletec/coordinates.txt");
-
-    // while (await lockFile.exists()) {
-    //   await Future.delayed(const Duration(milliseconds: 100));
-    // }
-
-    // Limpar o conteúdo do arquivo antes de escrever novos dados
-    // await file.writeAsString('');
-
-    // Escrever as coordenadas no arquivo .txt
-    // try {
-    //   if (!(await lockFile.exists())) {
-    //     await lockFile.create();
-    //   }
-    //   await dataFile.writeAsString('$func $cont $lat $long',
-    //       mode: FileMode.write);
-    // } finally {
-    //   if (await lockFile.exists()) {
-    //     try {
-    //       await lockFile.delete();
-    //     } catch (e) {
-    //       print("Erro: $e");
-    //     }
-    //   }
-    // }
   }
 
   double _bytesToDouble(Uint8List bytes) {
@@ -242,18 +209,13 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
 
     setNewCoordinates();
-    // File dataFile = File("C:/Users/rafae/Projects/atletec/games/game$fileCounter.txt");
-    // fileCounter++;
-    // await dataFile.create();
     subscription = reader!.stream.listen(
       (data) {
         for (var byte in data) {
           buffer.add(byte);
-          // print(buffer);
           if (byte == 0x7e) {
             buffer = _parseData(buffer);
             if (buffer.isEmpty) continue;
-            // await dataFile.writeAsString(buffer.toString(), mode: FileMode.append);
             if (buffer.elementAt(1) == 3) {
               Provider.of<Manager>(context, listen: false)
                   .updateBattery(buffer.elementAt(8));
@@ -297,8 +259,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                   _counter++;
                 });
               }
-              // buffer = _parseData(buffer);
-              // print('Received: $buffer');
             } else if (buffer.elementAt(1) == 2) {
               Provider.of<Manager>(context, listen: false).updateGPS(true);
               Uint8List newData = Uint8List.fromList(buffer);
@@ -323,43 +283,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       },
       cancelOnError: true,
     );
-    // _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
-    //   final response = await http.get(Uri.parse('http://127.0.0.1:5000/data'));
-    //   if(response.statusCode == 200){
-    //     final data = jsonDecode(response.body);
-    //     print(data);
-    //     if(data['accelz'] != null){
-    //       // for(final int d in data['accelz']){
-    //       //   setState(() {
-    //       //     _accelzPoints.add(FlSpot(_counter.toDouble(), d.toDouble()));
-    //       //   });
-    //       //   _counter++;
-    //       // }
-    //       // while(_accelzPoints.length > 100){
-    //       //   _accelzPoints.removeAt(0);
-    //       // }
-    //     }
-    //   }
-    // });
-    // const duration = Duration(milliseconds: 50);
-    // _timer = Timer.periodic(duration, (Timer timer) async {
-    //   final response = await http.get(Uri.parse('http://127.0.0.1:5000/data?port=$_port'));
-    //   if(response.statusCode == 200){
-    //     final data = jsonDecode(response.body);
-    //     print(data);
-    //     if(data['gyroz'] != null){
-    //       print(data['gyroz']);
-    //     }
-    //   }
-    // });
-    // final responde = await http.get(Uri.parse('http://127.0.0.1:5000/data?port=$_port'));
-    // if(responde.statusCode == 200){
-    //   final data = jsonDecode(responde.body);
-    //   // print(data);
-    //   if(data['gyroz'] != null){
-    //     print(data['gyroz']);
-    //   }
-    // }
   }
 
   @override
@@ -488,37 +411,16 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                     ),
                   ))
               : Center(
-                  child: ValueListenableBuilder<int>(
-                    valueListenable: imgKeyNotifier,
-                    builder: (context, key, child) {
-                      return imgFile == null
-                          ? const Placeholder()
-                          : AspectRatio(
-                              aspectRatio: 2, // Ajuste a proporção do campo
-                              child: FittedBox(
-                                fit: BoxFit.contain,
-                                child: RepaintBoundary(
-                                  child: Image.file(
-                                    imgFile!,
-                                    key: ValueKey(key), // Atualiza a imagem apenas quando necessário
-                                  ),
-                                ),
-                              ),
-                            );
-                    },
-                  ),
+                  child: imgFile == null
+                      ? const Placeholder()
+                      : AspectRatio(
+                          aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
+                          child: FittedBox(
+                            fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
+                            child: Image.file(imgFile!, key: ValueKey(imgKey)),
+                          ),
+                        ),
                 ),
-              // : Center(
-              //     child: imgFile == null
-              //         ? const Placeholder()
-              //         : AspectRatio(
-              //             aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
-              //             child: FittedBox(
-              //               fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
-              //               child: Image.file(imgFile!, key: ValueKey(imgKey)),
-              //             ),
-              //           ),
-              //   ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
