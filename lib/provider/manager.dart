@@ -24,8 +24,12 @@ class Manager with ChangeNotifier {
   late Box<Field> _fieldBox;
   late Box<Match> _matchBox;
 
+  final List<MetricModel> _metrics = [];  
+  List<MetricModel> get metrics => List.unmodifiable(_metrics);
+
   Manager() {
     _init();
+    _addDefaultMetrics();
   }
 
   Future<void> _init() async {
@@ -34,6 +38,16 @@ class Manager with ChangeNotifier {
     _fieldBox = await Hive.openBox<Field>('fields');
     _matchBox = await Hive.openBox<Match>('matches');
     notifyListeners();
+  }
+
+  void _addDefaultMetrics() {
+    if (_metrics.any((m) => m.name == "Aceleração")) return;
+
+    _metrics.add(MetricModel(name: "Aceleração"));
+    _metrics.add(MetricModel(name: "Distância"));
+    _metrics.add(MetricModel(name: "Velocidade"));
+
+    notifyListeners(); 
   }
 
   List<Player> get players => _playerBox.values.toList();
@@ -203,9 +217,6 @@ class Manager with ChangeNotifier {
 // --------------- MÉTRICAS --------------- //
 // ---------------------------------------- //
 
-  final List<MetricModel> _metrics = [];  
-
-  List<MetricModel> get metrics => List.unmodifiable(_metrics);
 
   void addMetric(String name) {
     // Evita duplicar se já existir
