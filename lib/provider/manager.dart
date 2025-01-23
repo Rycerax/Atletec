@@ -9,7 +9,7 @@ import 'package:atletec/model/metricModel.dart';
 
 class Manager with ChangeNotifier {
   String _sport = '';
-  String _func = 'Accel';
+  String _func = 'Metrics';
   String? port;
   int _battery = 0;
   bool _gps = false;
@@ -46,6 +46,7 @@ class Manager with ChangeNotifier {
     _metrics.add(MetricModel(name: "Aceleração"));
     _metrics.add(MetricModel(name: "Distância"));
     _metrics.add(MetricModel(name: "Velocidade"));
+    _metrics.add(MetricModel(name: "Teste"));
 
     notifyListeners(); 
   }

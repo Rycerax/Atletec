@@ -32,17 +32,18 @@ class Dashboardwidget extends StatelessWidget {
               ),
             ]),
           )
-        : Column(
-            children: [
-              Container(
-                height: 13,
-              ),
-              const HeaderWidget(),
-              Container(
-                height: 13,
-              ),
-              const SerialDataPlotter(),
-            ],
-          );
+        : SerialDataPlotter();
+        // Column(
+        //     children: [
+        //       Container(
+        //         height: 13,
+        //       ),
+        //       const HeaderWidget(),
+        //       Container(
+        //         height: 13,
+        //       ),
+        //       const SerialDataPlotter(),
+        //     ],
+        //   );
   }
 }

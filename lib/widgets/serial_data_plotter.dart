@@ -3,6 +3,8 @@ import 'dart:ffi';
 import 'dart:io';
 import 'package:atletec/provider/manager.dart';
 import 'package:atletec/model/metricModel.dart';
+import 'package:atletec/widgets/header_widget.dart';
+import 'package:atletec/widgets/metricsScreen.dart';
 import 'package:csv/csv.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +29,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   int initIndex = 14;
   double yRange = 8000;
   List<int> buffer = [];
-  String func = 'Accel';
+  String func = 'Metrics';
   SerialPortReader? reader;
   bool playing = false;
   StreamSubscription<List<int>>? subscription;
@@ -297,154 +299,88 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   Widget build(BuildContext context) {
     final st = Provider.of<Manager>(context);
     try {
-      return Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              RadioMenuButton(
-                  value: 'Accel',
-                  groupValue: func,
-                  onChanged: (val) {
-                    st.updateFunc(val!);
-                    setState(() {
-                      func = val.toString();
-                      initIndex = 14;
-                      yRange = 8000;
-                    });
-                  },
-                  style: ButtonStyle(
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                      elevation: const WidgetStatePropertyAll(5)),
-                  child: const Text('Accelerometer')),
-              RadioMenuButton(
-                  value: 'Gyro',
-                  groupValue: func,
-                  onChanged: (val) {
-                    setState(() {
+      return Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: Column(
+          children: [
+            HeaderWidget(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                RadioMenuButton(
+                    value: 'Metrics',
+                    groupValue: func,
+                    onChanged: (val) {
                       st.updateFunc(val!);
-                      func = val.toString();
-                      initIndex = 8;
-                      yRange = 32000;
-                    });
-                  },
-                  style: ButtonStyle(
-                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10))),
-                      elevation: const WidgetStatePropertyAll(5)),
-                  child: const Text('Gyroscope')),
-              st.selectedMatch!.sport == 'Futebol'
-                  ? RadioMenuButton(
-                      value: 'Heat',
-                      groupValue: func,
-                      onChanged: (val) {
-                        setState(() {
-                          st.updateFunc(val!);
-                          func = val.toString();
-                        });
-                      },
-                      style: ButtonStyle(
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10))),
-                          elevation: const WidgetStatePropertyAll(5)),
-                      child: const Text('Heat Map'))
-                  : const SizedBox(),
-            ],
-          ),
-          st.func != 'Heat'
-              ? AspectRatio(
-                  aspectRatio: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: LineChart(
-                      LineChartData(
-                        minY: -yRange,
-                        maxY: yRange,
-                        minX: _accelxPoints.first.x + 20,
-                        maxX: _accelxPoints.last.x,
-                        lineTouchData: const LineTouchData(enabled: false),
-                        clipData: const FlClipData.all(),
-                        gridData: const FlGridData(
-                          show: true,
-                          drawVerticalLine: false,
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                              spots: _accelxPoints,
-                              isCurved: true,
-                              barWidth: 2,
-                              color: Colors.red,
-                              belowBarData: BarAreaData(show: false),
-                              dotData: const FlDotData(show: false)),
-                          LineChartBarData(
-                              spots: _accelyPoints,
-                              isCurved: true,
-                              barWidth: 2,
-                              color: Colors.green,
-                              belowBarData: BarAreaData(show: false),
-                              dotData: const FlDotData(show: false)),
-                          LineChartBarData(
-                              spots: _accelzPoints,
-                              isCurved: true,
-                              barWidth: 2,
-                              color: Colors.blue,
-                              belowBarData: BarAreaData(show: false),
-                              dotData: const FlDotData(show: false))
-                        ],
-                        titlesData: const FlTitlesData(
-                          show: true,
-                          rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false)),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: false),
-                          ),
-                          leftTitles: AxisTitles(
-                            sideTitles:
-                                SideTitles(showTitles: true, reservedSize: 40),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ))
+                      setState(() {
+                        func = val.toString();
+                        initIndex = 14;
+                        yRange = 8000;
+                      });
+                    },
+                    style: ButtonStyle(
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10))),
+                        elevation: const WidgetStatePropertyAll(5)),
+                    child: const Text('Metrics')),
+                st.selectedMatch!.sport == 'Futebol'
+                    ? RadioMenuButton(
+                        value: 'Heat',
+                        groupValue: func,
+                        onChanged: (val) {
+                          setState(() {
+                            st.updateFunc(val!);
+                            func = val.toString();
+                          });
+                        },
+                        style: ButtonStyle(
+                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10))),
+                            elevation: const WidgetStatePropertyAll(5)),
+                        child: const Text('Heat Map'))
+                    : const SizedBox(),
+              ],
+            ),
+            Expanded(
+              child: st.func != 'Heat'
+              ? const MetricsScreen()
               : Center(
                   child: imgFile == null
-                      ? const Placeholder()
-                      : AspectRatio(
-                          aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
-                          child: FittedBox(
-                            fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
-                            child: Image.file(imgFile!, key: ValueKey(imgKey)),
-                          ),
+                    ? const Placeholder()
+                    : AspectRatio(
+                        aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
+                        child: FittedBox(
+                          fit: BoxFit.contain, // You can also use BoxFit.cover, BoxFit.fill, etc.
+                          child: Image.file(imgFile!, key: ValueKey(imgKey)),
                         ),
+                      ),
                 ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                iconSize: 35,
-                icon: playing
-                    ? const Icon(Icons.stop_circle_rounded)
-                    : const Icon(Icons.play_circle_filled_rounded),
-                onPressed: () {
-                  if (playing) {
-                    _stopListening();
-                  } else {
-                    _initPort(context);
-                  }
-                  setState(() {
-                    playing = !playing;
-                  });
-                },
-              ),
-              const SizedBox(width: 20),
-              Text(formatTime(_secondsElapsed), style: const TextStyle(fontSize: 24, color: Colors.white))
-            ]
-          )
-        ],
+            ), 
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  iconSize: 35,
+                  icon: playing
+                      ? const Icon(Icons.stop_circle_rounded)
+                      : const Icon(Icons.play_circle_filled_rounded),
+                  onPressed: () {
+                    if (playing) {
+                      _stopListening();
+                    } else {
+                      _initPort(context);
+                    }
+                    setState(() {
+                      playing = !playing;
+                    });
+                  },
+                ),
+                const SizedBox(width: 20),
+                Text(formatTime(_secondsElapsed), style: const TextStyle(fontSize: 24, color: Colors.white))
+              ]
+            )
+          ],
+        ),
       );
     } catch (e) {
       print(e);

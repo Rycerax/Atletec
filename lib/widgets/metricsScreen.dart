@@ -12,26 +12,23 @@ class MetricsScreen extends StatelessWidget {
     final manager = Provider.of<Manager>(context);
     final metrics = manager.metrics;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Métricas em tempo de execução'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
-          // Responsivo: quantas colunas couberem
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 250, // Ajuste conforme desejar
-            childAspectRatio: 1.2,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-          ),
-          itemCount: metrics.length,
-          itemBuilder: (context, index) {
-            final metric = metrics[index];
-            return MetricCard(metric: metric);
-          },
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
+        // Ajuste o delegate como quiser
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 250,
+          childAspectRatio: 1.2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
         ),
+        itemCount: metrics.length,
+        itemBuilder: (context, index) {
+          final metric = metrics[index];
+          return MetricCard(metric: metric);
+        },
       ),
     );
   }
@@ -56,7 +53,7 @@ class MetricCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.blueGrey[900],
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           boxShadow: const [
             BoxShadow(color: Colors.black45, blurRadius: 4),
           ],
