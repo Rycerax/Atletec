@@ -31,12 +31,6 @@ class DataProcessor {
   // Para distância total
   double _totalDistance = 0.0;
 
-  // Tempo total (soma dos timeSteps)
-  int _accumulatedTime = 0;
-
-  // Distâncias para calcular "distancePerMinute" (janela de 60 pacotes)
-  final List<double> _recentDistances = [];
-
   // Se quiser calcular faixas
   double _band4Distance = 0.0; // 4.0 m/s ~ 5.5 m/s
   double _band5Distance = 0.0; // 5.5 m/s ~ 7.0 m/s
@@ -106,9 +100,8 @@ class DataProcessor {
       dt = 0;
     }
 
-    // 4. Atualizar distância e tempo total
+    // 4. Atualizar distância total
     _totalDistance += dist;
-    _accumulatedTime += dt;
 
     // 5. Aceleração = (v2 - v1) / dt
     double accelMS2 = 0.0;

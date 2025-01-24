@@ -28,8 +28,12 @@ class Manager with ChangeNotifier {
 
   final List<MetricModel> _metrics = [];  
   List<MetricModel> get metrics => List.unmodifiable(_metrics);
-  final DataProcessor _processor = DataProcessor();
 
+  final DataProcessor _processor = DataProcessor();
+  DataPacket pacote_atual = DataPacket(timestamp: DateTime.now(), xg: 0, yg: 0, zg: 0, xa: 0, ya: 0, za: 0, latitude: 0, longitude: 0);
+  PacketResult metricsPack = PacketResult(velocityMS: 0, velocityKMH: 0, accelerationMS2: 0, totalDistance: 0, timeStep: 0, band4Distance: 0, band5Distance: 0);
+
+  get processor => _processor;
   Manager() {
     _init();
     _addDefaultMetrics();
@@ -44,7 +48,7 @@ class Manager with ChangeNotifier {
   }
 
   void _addDefaultMetrics() {
-    if (_metrics.any((m) => m.name == "Aceleração")) return;
+    if (_metrics.any((m) => m.name == "Aceleração m/s²")) return;
 
     _metrics.add(MetricModel(name: "Aceleração m/s²"));
     _metrics.add(MetricModel(name: "Distância Percorrida Total"));
@@ -246,8 +250,47 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAllMetrics(){
+  void updateAllMetrics(DataPacket pack){
+    if (pack.xa == pacote_atual.xa && pack.ya == pacote_atual.ya && pack.za == pacote_atual.za){
+      return;
+    }
+    if(pack.xa == 0 && pack.ya == 0 && pack.za == 0 && pack.xg == 0 && pack.yg == 0 && pack.zg == 0){
+      pacote_atual.latitude = pack.latitude;
+      pacote_atual.longitude = pack.longitude;
+    } else if (pack.latitude == 0 && pack.longitude ==0){
+      pacote_atual.xa = pack.xa;
+      pacote_atual.ya = pack.ya;
+      pacote_atual.za = pack.za;
+      pacote_atual.xg = pack.xg;
+      pacote_atual.yg = pack.yg;
+      pacote_atual.zg = pack.zg;
+    }
+    pacote_atual.timestamp = pack.timestamp;
+
+    metricsPack = _processor.updateWithNewPacket(pacote_atual);
     
+    for(final metric in _metrics){
+      if(metric.name == "Aceleração m/s²"){
+        metric.updateValue(metricsPack.accelerationMS2);
+      } else if(metric.name == "Distância Percorrida Total"){
+        metric.updateValue(metricsPack.totalDistance);
+      } else if(metric.name == "Velocidade km/h"){
+        metric.updateValue(metricsPack.velocityKMH);
+      } else if(metric.name == "Velocidade m/s"){
+        metric.updateValue(metricsPack.velocityMS);
+      } else if(metric.name == "Distância na Faixa 4"){
+        metric.updateValue(metricsPack.band4Distance);
+      } else if(metric.name == "Distância na Faixa 5"){
+        metric.updateValue(metricsPack.band5Distance);
+      } 
+    } 
+    // findMetricByName("Aceleração m/s²") ;
+    // findMetricByName("Distância Percorrida Total");
+    // findMetricByName("Velocidade km/h");
+    // findMetricByName("Velocidade m/s");
+    // findMetricByName("Distância na Faixa 4");
+    // findMetricByName("Distância na Faixa 5");
+    notifyListeners();
   }
 
 }

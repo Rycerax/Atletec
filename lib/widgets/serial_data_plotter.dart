@@ -109,7 +109,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
   }
 
-  void _initPort(BuildContext context) {
+  void _initPort(BuildContext context, Manager st) {
     port = SerialPort(Provider.of<Manager>(context, listen: false).port!);
     if (port!.openReadWrite()) {
       config.baudRate = 115200;
@@ -117,7 +117,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       port!.config = config;
       reader = SerialPortReader(port!);
       broadcastStream = reader!.stream.asBroadcastStream();
-      _startListening(context);
+      _startListening(context, st);
     } else {
       print('Failed to open port!');
     }
@@ -199,7 +199,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
   }
 
-  void _startListening(BuildContext context) async {
+  void _startListening(BuildContext context, Manager st) async {
     _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
       setState(() {
         _secondsElapsed++;
@@ -210,7 +210,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       print('Broadcast Stream is null!');
       return;
     }
-
     setNewCoordinates();
     subscription = reader!.stream.listen(
       (data) {
@@ -252,7 +251,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               pacote_atual.zg = zg;
               pacote_atual.latitude = 0;
               pacote_atual.longitude = 0;
-              
+              st.updateAllMetrics(pacote_atual);
               writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND']);
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
@@ -286,6 +285,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               pacote_atual.zg = 0;
               pacote_atual.latitude = _bytesToDouble(latBytes);
               pacote_atual.longitude = _bytesToDouble(longBytes);
+              st.updateAllMetrics(pacote_atual);
               writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
@@ -388,7 +388,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
                     if (playing) {
                       _stopListening();
                     } else {
-                      _initPort(context);
+                      _initPort(context, st);
                     }
                     setState(() {
                       playing = !playing;
