@@ -6,6 +6,7 @@ import 'package:atletec/model/field.dart';
 import 'package:atletec/model/match.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:atletec/model/metricModel.dart';
+import 'package:atletec/provider/data_processor.dart';
 
 class Manager with ChangeNotifier {
   String _sport = '';
@@ -24,8 +25,10 @@ class Manager with ChangeNotifier {
   late Box<Field> _fieldBox;
   late Box<Match> _matchBox;
 
+
   final List<MetricModel> _metrics = [];  
   List<MetricModel> get metrics => List.unmodifiable(_metrics);
+  final DataProcessor _processor = DataProcessor();
 
   Manager() {
     _init();
@@ -43,10 +46,12 @@ class Manager with ChangeNotifier {
   void _addDefaultMetrics() {
     if (_metrics.any((m) => m.name == "Aceleração")) return;
 
-    _metrics.add(MetricModel(name: "Aceleração"));
-    _metrics.add(MetricModel(name: "Distância"));
-    _metrics.add(MetricModel(name: "Velocidade"));
-    _metrics.add(MetricModel(name: "Teste"));
+    _metrics.add(MetricModel(name: "Aceleração m/s²"));
+    _metrics.add(MetricModel(name: "Distância Percorrida Total"));
+    _metrics.add(MetricModel(name: "Velocidade km/h"));
+    _metrics.add(MetricModel(name: "Velocidade m/s"));
+    _metrics.add(MetricModel(name: "Distância na Faixa 4"));
+    _metrics.add(MetricModel(name: "Distância na Faixa 5"));
 
     notifyListeners(); 
   }
@@ -239,6 +244,10 @@ class Manager with ChangeNotifier {
     );
     metric.updateValue(newValue);
     notifyListeners();
+  }
+
+  void updateAllMetrics(){
+    
   }
 
 }

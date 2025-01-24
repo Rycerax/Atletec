@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:atletec/provider/data_processor.dart';
 
 class SerialDataPlotter extends StatefulWidget {
   const SerialDataPlotter({super.key});
@@ -48,7 +49,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   String filePath = '';
   File file = File('');
   ValueNotifier<int> imgKeyNotifier = ValueNotifier(0); // Gerencia atualizações de imagem
-
+  DataPacket pacote_atual = DataPacket(timestamp: DateTime.now(), xg: 0, yg: 0, zg: 0, xa: 0, ya: 0, za: 0, latitude: 0, longitude: 0);
   @override
   void initState() {
     super.initState();
@@ -242,6 +243,16 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               xa /= 20.0;
               ya /= 20.0;
               za /= 20.0;
+              pacote_atual.timestamp = DateTime.now();
+              pacote_atual.xa = xa;
+              pacote_atual.ya = ya;
+              pacote_atual.za = za;
+              pacote_atual.xg = xg;
+              pacote_atual.yg = yg;
+              pacote_atual.zg = zg;
+              pacote_atual.latitude = 0;
+              pacote_atual.longitude = 0;
+              
               writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND']);
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
@@ -266,6 +277,15 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Uint8List newData = Uint8List.fromList(buffer);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
+              pacote_atual.timestamp = DateTime.now();
+              pacote_atual.xa = 0;
+              pacote_atual.ya = 0;
+              pacote_atual.za = 0;
+              pacote_atual.xg = 0;
+              pacote_atual.yg = 0;
+              pacote_atual.zg = 0;
+              pacote_atual.latitude = _bytesToDouble(latBytes);
+              pacote_atual.longitude = _bytesToDouble(longBytes);
               writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
