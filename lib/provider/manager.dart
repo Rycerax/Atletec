@@ -50,12 +50,12 @@ class Manager with ChangeNotifier {
   void _addDefaultMetrics() {
     if (_metrics.any((m) => m.name == "Aceleração m/s²")) return;
 
-    _metrics.add(MetricModel(name: "Aceleração m/s²"));
-    _metrics.add(MetricModel(name: "Distância Percorrida Total"));
-    _metrics.add(MetricModel(name: "Velocidade km/h"));
-    _metrics.add(MetricModel(name: "Velocidade m/s"));
-    _metrics.add(MetricModel(name: "Distância na Faixa 4"));
-    _metrics.add(MetricModel(name: "Distância na Faixa 5"));
+    _metrics.add(MetricModel(name: "Aceleração (m/s²)", unitMeasure: "m/s²"));
+    _metrics.add(MetricModel(name: "Distância Total (m)", unitMeasure: "m"));
+    _metrics.add(MetricModel(name: "Velocidade (km/h)", unitMeasure: "km/h"));
+    _metrics.add(MetricModel(name: "Velocidade (m/s)", unitMeasure: "m/s"));
+    _metrics.add(MetricModel(name: "Distância na Faixa 4 (m)", unitMeasure: "m"));
+    _metrics.add(MetricModel(name: "Distância na Faixa 5 (m)", unitMeasure: "m"));
 
     notifyListeners(); 
   }
@@ -228,23 +228,10 @@ class Manager with ChangeNotifier {
 // ---------------------------------------- //
 
 
-  void addMetric(String name) {
-    // Evita duplicar se já existir
-    if (_metrics.any((m) => m.name == name)) return;
-    _metrics.add(MetricModel(name: name));
-    notifyListeners();
-  }
 
   void updateMetric(String name, double newValue) {
     final metric = _metrics.firstWhere(
       (m) => m.name == name,
-      orElse: () {
-        // se não encontrou, cria na hora
-        final newMetric = MetricModel(name: name);
-        _metrics.add(newMetric);
-        print("Nova métrica criada: " + name);
-        return newMetric;
-      },
     );
     metric.updateValue(newValue);
     notifyListeners();
@@ -268,17 +255,17 @@ class Manager with ChangeNotifier {
     metricsPack = _processor.updateWithNewPacket(pack);
     
     for(final metric in _metrics){
-      if(metric.name == "Aceleração m/s²"){
+      if(metric.name == "Aceleração (m/s²)"){
         metric.updateValue(metricsPack.accelerationMS2);
-      } else if(metric.name == "Distância Percorrida Total"){
+      } else if(metric.name == "Distância Total (m)"){
         metric.updateValue(metricsPack.totalDistance);
-      } else if(metric.name == "Velocidade km/h"){
+      } else if(metric.name == "Velocidade (km/h)"){
         metric.updateValue(metricsPack.velocityKMH);
-      } else if(metric.name == "Velocidade m/s"){
+      } else if(metric.name == "Velocidade (m/s)"){
         metric.updateValue(metricsPack.velocityMS);
-      } else if(metric.name == "Distância na Faixa 4"){
+      } else if(metric.name == "Distância na Faixa 4 (m)"){
         metric.updateValue(metricsPack.band4Distance);
-      } else if(metric.name == "Distância na Faixa 5"){
+      } else if(metric.name == "Distância na Faixa 5 (m)"){
         metric.updateValue(metricsPack.band5Distance);
       } 
     } 

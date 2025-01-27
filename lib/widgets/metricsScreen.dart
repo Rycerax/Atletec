@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -71,12 +73,12 @@ class MetricCard extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              "Atual: ${metric.lastValue.toStringAsFixed(2)}",
+              "Atual: ${metric.lastValue.toStringAsFixed(2)} ${metric.unitMeasure}",
               style: const TextStyle(fontSize: 14, color: Colors.white),
             ),
             const SizedBox(height: 4),
             Text(
-              "Anterior: ${metric.previousValue?.toStringAsFixed(2) ?? '-'}",
+              "Anterior: ${metric.previousValue?.toStringAsFixed(2) ?? '-'} ${metric.unitMeasure}",
               style: const TextStyle(fontSize: 14, color: Colors.white70),
             ),
           ],
@@ -104,6 +106,11 @@ class MetricGraphDialog extends StatelessWidget {
 
     // Ordenar por tempo (caso alguma atualização fora de ordem)
     spots.sort((a, b) => a.x.compareTo(b.x));
+    // final double minX = spots.isEmpty ? 0 : spots.first.x;
+    // final double maxX = spots.isEmpty ? 0 : spots.last.x;
+    // final double rangeX = maxX - minX;
+    // final int numLabelsX = 5;
+    // final double interval = rangeX == 0 ? 1 : rangeX / (numLabelsX - 1);
 
     // Se quiser converter o eixo X para datas, precisamos formatar
     // Exemplo: mostra rótulos a cada 5 segundos, etc.
@@ -118,6 +125,8 @@ class MetricGraphDialog extends StatelessWidget {
         height: 300,
         child: LineChart(
           LineChartData(
+            // minX: minX,
+            // maxX: maxX,
             lineBarsData: [
               LineChartBarData(
                 spots: spots,

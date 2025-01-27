@@ -13,11 +13,13 @@ class MetricModel {
   double lastValue;
   double? previousValue;
   List<MetricRecord> history;
+  String unitMeasure;
 
   MetricModel({
     required this.name,
     this.lastValue = 0.0,
     this.previousValue,
+    required this.unitMeasure,
     List<MetricRecord>? history,
   }) : history = history ?? [];
 
