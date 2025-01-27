@@ -23,7 +23,7 @@ class DataPacket {
 /// Essa classe guarda o estado acumulado e faz o cálculo incremental
 class DataProcessor {
   // Último pacote recebido (para comparar com o próximo)
-  DataPacket? _lastPacket;
+  DataPacket _lastPacket = DataPacket(timestamp: DateTime.now(), xg: 0, yg: 0, zg: 0, xa: 0, ya: 0, za: 0, latitude: 0, longitude: 0);
 
   // Guarda a velocidade anterior (para calcular aceleração)
   double _lastVelocityMS = 0.0;
@@ -49,36 +49,37 @@ class DataProcessor {
   /// Distância percorrida na faixa 5
   double get band5Distance => _band5Distance;
 
+  double _deg2rad(double deg){
+    return deg * (math.pi / 180.0);
+  }
+  
+  double _calculateDistance(
+      double lat1, double lon1,
+      double lat2, double lon2,
+  ) {
+    const R = 6371000.0; // raio da terra em metros
+    double dLat = _deg2rad(lat2 - lat1);
+    double dLon = _deg2rad(lon2 - lon1);
+    print(dLat);
+    print(dLon);
+    double a = math.sin(dLat / 2) * math.sin(dLat / 2)
+      + math.cos(_deg2rad(lat1)) * math.cos(_deg2rad(lat2)) 
+      * math.sin(dLon / 2) * math.sin(dLon / 2);
+    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+    return R * c;
+  }
   /// Atualiza o processamento com um novo pacote
   /// Retorna um objeto [PacketResult] com as métricas calculadas
   PacketResult updateWithNewPacket(DataPacket current) {
-    // Se for o primeiro pacote, não calcula nada, só inicializa
-    if (_lastPacket == null) {
-      _lastPacket = current;
-      return PacketResult(
-        velocityMS: 0,
-        velocityKMH: 0,
-        accelerationMS2: 0,
-        totalDistance: 0,
-        timeStep: 0,
-        band4Distance: 0,
-        band5Distance: 0,
-      );
-    }
-
-    final prev = _lastPacket!;
-
+    
     // 1. Calcular delta tempo (segundos)
-    int dt = current.timestamp.difference(prev.timestamp).inSeconds;
+    int dt = current.timestamp.difference(_lastPacket.timestamp).inSeconds;
     if (dt < 0) dt = dt.abs(); // caso problema de ordenação
     if (dt == 0) dt = 1; // se 0, forçamos 1
-
+    // print("delta t: ${dt}");
     // 2. Calcular distância incremental (m)
-    double dist = _calculateDistance(
-      prev.latitude, prev.longitude,
-      current.latitude, current.longitude,
-    );
-
+    double dist = _calculateDistance(_lastPacket.latitude, _lastPacket.longitude, current.latitude, current.longitude);
+    // print("Distância : ${dist}");
     // Filtrar outliers
     if (dist > 100.0) {
       dist = 0.0; // descarta como fazia no Python
@@ -91,7 +92,8 @@ class DataProcessor {
       velocityMS = dist / dt;
     }
     double velocityKMH = velocityMS * 3.6;
-
+    // print("Velocidade km/h: ${velocityKMH}");
+    // print("Velocidade ms: ${velocityMS}");
     // Se velocidade > 40km/h => descartar
     if (velocityKMH > 40) {
       velocityMS = 0.0;
@@ -102,7 +104,7 @@ class DataProcessor {
 
     // 4. Atualizar distância total
     _totalDistance += dist;
-
+    // print("Dist total: ${_totalDistance}");
     // 5. Aceleração = (v2 - v1) / dt
     double accelMS2 = 0.0;
     if (dt > 0) {
@@ -122,6 +124,9 @@ class DataProcessor {
     _lastVelocityMS = velocityMS;
 
     // Retorna valores calculados nesta iteração
+    // print("Band4: ${band4Distance}");
+    // print("Band5: ${band5Distance}");
+    // print("Aceleração: ${accelMS2}");
     return PacketResult(
       velocityMS: velocityMS,
       velocityKMH: velocityKMH,
@@ -133,23 +138,6 @@ class DataProcessor {
     );
   }
 
-  double _deg2rad(double deg){
-    return deg * (math.pi / 180.0);
-  }
-  
-  double _calculateDistance(
-      double lat1, double lon1,
-      double lat2, double lon2,
-  ) {
-    const R = 6371000.0; // raio da terra em metros
-    double dLat = _deg2rad(lat2 - lat1);
-    double dLon = _deg2rad(lon2 - lon1);
-    double a = math.sin(dLat / 2) * math.sin(dLat / 2)
-      + math.cos(_deg2rad(lat1)) * math.cos(_deg2rad(lat2)) 
-      * math.sin(dLon / 2) * math.sin(dLon / 2);
-    double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
-    return R * c;
-  }
 }
 
 /// Só para agrupar o resultado do processamento de um único pacote

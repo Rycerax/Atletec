@@ -250,14 +250,12 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateAllMetrics(DataPacket pack){
-    if (pack.xa == pacote_atual.xa && pack.ya == pacote_atual.ya && pack.za == pacote_atual.za){
-      return;
-    }
-    if(pack.xa == 0 && pack.ya == 0 && pack.za == 0 && pack.xg == 0 && pack.yg == 0 && pack.zg == 0){
+  void updateAllMetrics(DataPacket pack, String f){
+    
+    if(f == "gps"){
       pacote_atual.latitude = pack.latitude;
       pacote_atual.longitude = pack.longitude;
-    } else if (pack.latitude == 0 && pack.longitude ==0){
+    } else{
       pacote_atual.xa = pack.xa;
       pacote_atual.ya = pack.ya;
       pacote_atual.za = pack.za;
@@ -265,9 +263,9 @@ class Manager with ChangeNotifier {
       pacote_atual.yg = pack.yg;
       pacote_atual.zg = pack.zg;
     }
-    pacote_atual.timestamp = pack.timestamp;
+    // pacote_atual.timestamp = pack.timestamp;
 
-    metricsPack = _processor.updateWithNewPacket(pacote_atual);
+    metricsPack = _processor.updateWithNewPacket(pack);
     
     for(final metric in _metrics){
       if(metric.name == "Aceleração m/s²"){

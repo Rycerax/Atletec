@@ -249,9 +249,9 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               pacote_atual.xg = xg;
               pacote_atual.yg = yg;
               pacote_atual.zg = zg;
-              pacote_atual.latitude = 0;
-              pacote_atual.longitude = 0;
-              st.updateAllMetrics(pacote_atual);
+              // pacote_atual.latitude = 0;
+              // pacote_atual.longitude = 0;
+              // st.updateAllMetrics(pacote_atual, "");
               writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND']);
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
@@ -276,16 +276,24 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               Uint8List newData = Uint8List.fromList(buffer);
               Uint8List latBytes = newData.sublist(8, 16);
               Uint8List longBytes = newData.sublist(16, 24);
-              pacote_atual.timestamp = DateTime.now();
-              pacote_atual.xa = 0;
-              pacote_atual.ya = 0;
-              pacote_atual.za = 0;
-              pacote_atual.xg = 0;
-              pacote_atual.yg = 0;
-              pacote_atual.zg = 0;
+              // pacote_atual.xa = 0;
+              // pacote_atual.ya = 0;
+              // pacote_atual.za = 0;
+              // pacote_atual.xg = 0;
+              // pacote_atual.yg = 0;
+              // pacote_atual.zg = 0;
               pacote_atual.latitude = _bytesToDouble(latBytes);
               pacote_atual.longitude = _bytesToDouble(longBytes);
-              st.updateAllMetrics(pacote_atual);
+              st.updateAllMetrics(DataPacket(timestamp: DateTime.now(), 
+              xg: pacote_atual.xg, 
+              yg: pacote_atual.yg, 
+              zg: pacote_atual.zg, 
+              xa: pacote_atual.xa, 
+              ya: pacote_atual.ya, 
+              za: pacote_atual.za, 
+              latitude: _bytesToDouble(latBytes), 
+              longitude: _bytesToDouble(longBytes)), "gps");
+              // st.updateAllMetrics(pacote_atual, "gps");
               writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
