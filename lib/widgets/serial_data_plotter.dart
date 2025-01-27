@@ -53,6 +53,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   @override
   void initState() {
     super.initState();
+    setNewCoordinates();
+    Provider.of<Manager>(context, listen: false).updateFunc("Metrics");
     _timer = Timer.periodic(const Duration(seconds: 3), (_) {
       setState(() {
         imageCache.clear();
@@ -192,7 +194,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     subscription?.cancel();
     subscription = null;
     resetData();
-
     if (port != null && port!.isOpen) {
       port!.close();
       print('Serial port closed!');
@@ -210,7 +211,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
       print('Broadcast Stream is null!');
       return;
     }
-    setNewCoordinates();
+    // setNewCoordinates();
     subscription = reader!.stream.listen(
       (data) {
         for (var byte in data) {
@@ -317,6 +318,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
   @override
   void dispose() {
+    setNewCoordinates();
     _timer?.cancel();
     reader!.close();
     _stopListening();
