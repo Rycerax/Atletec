@@ -250,11 +250,9 @@ class Manager with ChangeNotifier {
       pacote_atual.yg = pack.yg;
       pacote_atual.zg = pack.zg;
     }
-    PacketResult? newMetricsTest = _processor.updateWithNewPacket(pack);
-    if(newMetricsTest!=null){
-      metricsPack = newMetricsTest;
-    }
-    
+
+    metricsPack = processor.updateWithNewPacket(pack);
+
     for(final metric in _metrics){
       if(metric.name == "Aceleração (m/s²)"){
         metric.updateValue(metricsPack.accelerationMS2);
