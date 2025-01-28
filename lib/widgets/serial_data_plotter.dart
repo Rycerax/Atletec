@@ -253,7 +253,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               // pacote_atual.latitude = 0;
               // pacote_atual.longitude = 0;
               // st.updateAllMetrics(pacote_atual, "");
-              writeData([DateTime.now(), xg, yg, zg, xa, ya, za, 'ND', 'ND']);
+              writeData([pacote_atual.timestamp, xg, yg, zg, xa, ya, za, 'ND', 'ND']);
               for (var i = initIndex; i < buffer.length - 4; i += 12) {
                 setState(() {
                   _accelxPoints.add(FlSpot(
@@ -295,7 +295,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               latitude: _bytesToDouble(latBytes), 
               longitude: _bytesToDouble(longBytes)), "gps");
               // st.updateAllMetrics(pacote_atual, "gps");
-              writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
+              writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', pacote_atual.latitude, pacote_atual.longitude]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));

@@ -70,7 +70,7 @@ class DataProcessor {
   }
   /// Atualiza o processamento com um novo pacote
   /// Retorna um objeto [PacketResult] com as métricas calculadas
-  PacketResult updateWithNewPacket(DataPacket current) {
+  PacketResult? updateWithNewPacket(DataPacket current) {
     
     // 1. Calcular delta tempo (segundos)
     int dt = current.timestamp.difference(_lastPacket.timestamp).inSeconds;
@@ -84,6 +84,8 @@ class DataProcessor {
     if (dist > 100.0) {
       dist = 0.0; // descarta como fazia no Python
       dt = 0;
+    } else if(dist<2){
+      return null;
     }
 
     // 3. Velocidade
