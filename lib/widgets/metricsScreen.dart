@@ -6,6 +6,38 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:atletec/provider/manager.dart';
 import 'package:atletec/model/metricModel.dart';
 
+
+double getNiceInterval(double interval){
+  // Intervalos em ms (60.000 * minutos):
+  List<double> niceInterval = 
+  [1*1000,10*1000, 20*1000,1*60000,60000*2, 60000*5, 60000*10, 60000*15
+  , 60000*20, 60000*25, 60000*30, 60000*35, 60000*40, 
+  60000*45, 60000*50, 60000*55, 60000*60];
+
+  double closest = niceInterval.first;
+  double minDif = interval - closest;
+
+  for(final candidate in niceInterval){
+    final diff = (interval-candidate).abs();
+    if(diff < minDif){
+      minDif = diff;
+      closest = candidate;
+    }
+  }
+  return closest;
+}
+
+
+String formatLabel(DateTime date, double rangeMs) {
+  if (rangeMs <= 60000) {
+    // Menos de 1 min total
+    return "${date.second}s";
+  } else {
+    // Menos de 1 hora
+    return "${date.minute}:${date.second.toString().padLeft(2, '0')}";
+  }
+}
+
 class MetricsScreen extends StatelessWidget {
   const MetricsScreen({Key? key}) : super(key: key);
 
@@ -106,12 +138,12 @@ class MetricGraphDialog extends StatelessWidget {
 
     // Ordenar por tempo (caso alguma atualização fora de ordem)
     spots.sort((a, b) => a.x.compareTo(b.x));
-    // final double minX = spots.isEmpty ? 0 : spots.first.x;
-    // final double maxX = spots.isEmpty ? 0 : spots.last.x;
-    // final double rangeX = maxX - minX;
-    // final int numLabelsX = 5;
-    // final double interval = rangeX == 0 ? 1 : rangeX / (numLabelsX - 1);
-
+    final double minX = spots.isEmpty ? 0 : spots.first.x;
+    final double maxX = spots.isEmpty ? 0 : spots.last.x;
+    final double rangeX = maxX - minX;
+    const int numLabelsX = 5;
+    double niceInterval = rangeX == 0 ? 1 : rangeX/(numLabelsX-1);
+    niceInterval = getNiceInterval(niceInterval);
     // Se quiser converter o eixo X para datas, precisamos formatar
     // Exemplo: mostra rótulos a cada 5 segundos, etc.
     return AlertDialog(
@@ -125,28 +157,20 @@ class MetricGraphDialog extends StatelessWidget {
         height: 300,
         child: LineChart(
           LineChartData(
-            // minX: minX,
-            // maxX: maxX,
-            lineBarsData: [
-              LineChartBarData(
-                spots: spots,
-                isCurved: false,
-                barWidth: 2,
-                color: Colors.purpleAccent,
-                dotData: const FlDotData(show: false),
-              ),
-            ],
-            gridData: const FlGridData(show: true),
-            borderData: FlBorderData(show: false),
+            minX: minX,
+            maxX: maxX,
             titlesData: FlTitlesData(
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  interval: 5 * 1000, // ex.: 5s (em ms)
+                  interval: niceInterval,
                   getTitlesWidget: (value, meta) {
+                    if (value < minX || value > maxX) {
+                      return const SizedBox();
+                    }
                     final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
                     // Formatar como quiser (mm:ss por ex.)
-                    final text = "${date.minute}:${date.second.toString().padLeft(2,'0')}";
+                    final text = formatLabel(date, rangeX);
                     return Text(text, style: const TextStyle(color: Colors.white70, fontSize: 10));
                   },
                 ),
@@ -161,13 +185,21 @@ class MetricGraphDialog extends StatelessWidget {
                   ),
                 ),
               ),
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
-              rightTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false),
-              ),
+              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
             ),
+            gridData: const FlGridData(show: true),
+            borderData: FlBorderData(show: false),
+            lineBarsData: [
+              LineChartBarData(
+                spots: spots,
+                isCurved: false,
+                barWidth: 2,
+                color: Colors.purpleAccent,
+                dotData: const FlDotData(show: false),
+              ),
+            ],
+
           ),
         ),
       ),
