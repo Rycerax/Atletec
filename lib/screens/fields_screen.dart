@@ -151,12 +151,15 @@ class FieldsScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Nome'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                ),
               ),
               SizedBox(
-                width: 250,  // Define a largura fixa para o TextField
+                width: 240, 
                 child: TextField(
                   controller: coordinatesController,
                   maxLines: 1,  // Garante que o TextField tenha apenas uma linha

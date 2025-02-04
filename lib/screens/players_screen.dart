@@ -142,39 +142,63 @@ class PlayersScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Nome'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                ),
               ),
-              TextField(
-                controller: cpfController,
-                decoration: const InputDecoration(labelText: 'CPF'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: cpfController,
+                  decoration: const InputDecoration(labelText: 'CPF'),
+                ),
               ),
-              TextField(
-                controller: sexoController,
-                decoration: const InputDecoration(labelText: 'Sexo'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: sexoController,
+                  decoration: const InputDecoration(labelText: 'Sexo'),
+                ),
               ),
-              TextField(
-                controller: pesoController,
-                decoration: const InputDecoration(labelText: 'Peso'),
-                keyboardType: TextInputType.number,
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: pesoController,
+                  decoration: const InputDecoration(labelText: 'Peso'),
+                  keyboardType: TextInputType.number,
+                ),
               ),
-              TextField(
-                controller: alturaController,
-                decoration: const InputDecoration(labelText: 'Altura'),
-                keyboardType: TextInputType.number,
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: alturaController,
+                  decoration: const InputDecoration(labelText: 'Altura'),
+                  keyboardType: TextInputType.number,
+                ),
               ),
-              TextField(
-                controller: sportController,
-                decoration: const InputDecoration(labelText: 'Esporte'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: sportController,
+                  decoration: const InputDecoration(labelText: 'Esporte'),
+                ),
               ),
-              TextField(
-                controller: posicaoController,
-                decoration: const InputDecoration(labelText: 'Posição'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: posicaoController,
+                  decoration: const InputDecoration(labelText: 'Posição'),
+                ),
               ),
-              TextField(
-                controller: observacaoController,
-                decoration: const InputDecoration(labelText: 'Observação'),
+              Container(
+                width: 240,
+                child: TextField(
+                  controller: observacaoController,
+                  decoration: const InputDecoration(labelText: 'Observação'),
+                ),
               ),
             ],
           ),

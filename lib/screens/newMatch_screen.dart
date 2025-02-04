@@ -38,13 +38,19 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
       content: SingleChildScrollView(
         child: Column(
           children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Nome'),
+            Container(
+              width: 240,
+              child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Nome'),
+              ),
             ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Descrição'),
+            Container(
+              width: 240,
+              child: TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(labelText: 'Descrição'),
+              ),
             ),
             DropdownButtonFormField(
               menuMaxHeight: 200,
@@ -122,7 +128,7 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 name: nameController.text,
                 date: dataString,
                 description: descriptionController.text,
-                sport: selectedSport!,
+                sport: "Futebol",
                 playerId: manager.selectedPlayer!.id,
                 fieldId: manager.selectedField!.id,
               );
