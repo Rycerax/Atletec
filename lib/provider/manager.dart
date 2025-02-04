@@ -51,17 +51,27 @@ class Manager with ChangeNotifier {
     if (_metrics.any((m) => m.name == "Aceleração m/s²")) return;
 
     _metrics.add(MetricModel(name: "Aceleração (m/s²)", unitMeasure: "m/s²"));
-    _metrics.add(MetricModel(name: "Distância Total (m)", unitMeasure: "m"));
-    _metrics.add(MetricModel(name: "Velocidade (km/h)", unitMeasure: "km/h"));
     _metrics.add(MetricModel(name: "Velocidade (m/s)", unitMeasure: "m/s"));
+    _metrics.add(MetricModel(name: "Velocidade (km/h)", unitMeasure: "km/h"));
+    _metrics.add(MetricModel(name: "Distância Total (m)", unitMeasure: "m"));
     _metrics.add(MetricModel(name: "Distância na Faixa 4 (m)", unitMeasure: "m"));
     _metrics.add(MetricModel(name: "Distância na Faixa 5 (m)", unitMeasure: "m"));
 
     notifyListeners(); 
   }
 
-  List<Player> get players => _playerBox.values.toList();
-  List<Field> get fields => _fieldBox.values.toList();
+  List<Player> get players {
+    final playersList = _playerBox.values.toList();
+    playersList.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return playersList;
+  }
+  
+  List<Field> get fields {
+    final fieldsList = _fieldBox.values.toList();
+    fieldsList.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return fieldsList;
+  } 
+  
   List<Match> get matches => _matchBox.values.toList();
 
 
