@@ -47,6 +47,7 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
               decoration: const InputDecoration(labelText: 'Descrição'),
             ),
             DropdownButtonFormField(
+              menuMaxHeight: 200,
               decoration: const InputDecoration(
                 labelText: 'Selecione o Campo',
                 border: OutlineInputBorder(),
@@ -63,24 +64,25 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
                 });
               },
             ),
+            // DropdownButtonFormField(
+            //   decoration: const InputDecoration(
+            //     labelText: 'Selecione o Esporte',
+            //     border: OutlineInputBorder(),
+            //   ),
+            //   items: sportsList.map((sport) {
+            //     return DropdownMenuItem(
+            //       value: sport,
+            //       child: Text(sport),
+            //     );
+            //   }).toList(),
+            //   onChanged: (value) {
+            //     setState(() {
+            //       selectedSport = value;
+            //     });
+            //   },
+            // ),
             DropdownButtonFormField(
-              decoration: const InputDecoration(
-                labelText: 'Selecione o Esporte',
-                border: OutlineInputBorder(),
-              ),
-              items: sportsList.map((sport) {
-                return DropdownMenuItem(
-                  value: sport,
-                  child: Text(sport),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedSport = value;
-                });
-              },
-            ),
-            DropdownButtonFormField(
+              menuMaxHeight: 200,
               decoration: const InputDecoration(
                 labelText: 'Selecione o Atleta',
                 border: OutlineInputBorder(),

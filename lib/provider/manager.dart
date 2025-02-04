@@ -60,8 +60,18 @@ class Manager with ChangeNotifier {
     notifyListeners(); 
   }
 
-  List<Player> get players => _playerBox.values.toList();
-  List<Field> get fields => _fieldBox.values.toList();
+  List<Player> get players {
+    final playersList = _playerBox.values.toList();
+    playersList.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return playersList;
+  }
+  
+  List<Field> get fields {
+    final fieldsList = _fieldBox.values.toList();
+    fieldsList.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+    return fieldsList;
+  } 
+  
   List<Match> get matches => _matchBox.values.toList();
 
 
