@@ -192,21 +192,21 @@ class HistoryScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: nameController,
                   decoration: const InputDecoration(labelText: 'Nome'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: descriptionController,
                   decoration: const InputDecoration(labelText: 'Descrição'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: dateController,

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:atletec/provider/manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';

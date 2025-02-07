@@ -142,28 +142,28 @@ class PlayersScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: nameController,
                   decoration: const InputDecoration(labelText: 'Nome'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: cpfController,
                   decoration: const InputDecoration(labelText: 'CPF'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: sexoController,
                   decoration: const InputDecoration(labelText: 'Sexo'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: pesoController,
@@ -171,7 +171,7 @@ class PlayersScreen extends StatelessWidget {
                   keyboardType: TextInputType.number,
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: alturaController,
@@ -179,21 +179,21 @@ class PlayersScreen extends StatelessWidget {
                   keyboardType: TextInputType.number,
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: sportController,
                   decoration: const InputDecoration(labelText: 'Esporte'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: posicaoController,
                   decoration: const InputDecoration(labelText: 'Posição'),
                 ),
               ),
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: observacaoController,

@@ -1,5 +1,3 @@
-import 'dart:isolate';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -39,7 +37,7 @@ String formatLabel(DateTime date, double rangeMs) {
 }
 
 class MetricsScreen extends StatelessWidget {
-  const MetricsScreen({Key? key}) : super(key: key);
+  const MetricsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +69,7 @@ class MetricsScreen extends StatelessWidget {
 class MetricCard extends StatelessWidget {
   final MetricModel metric;
 
-  const MetricCard({Key? key, required this.metric}) : super(key: key);
+  const MetricCard({super.key, required this.metric});
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +121,7 @@ class MetricCard extends StatelessWidget {
 class MetricGraphDialog extends StatelessWidget {
   final MetricModel metric;
 
-  const MetricGraphDialog({Key? key, required this.metric}) : super(key: key);
+  const MetricGraphDialog({super.key, required this.metric});
 
   @override
   Widget build(BuildContext context) {

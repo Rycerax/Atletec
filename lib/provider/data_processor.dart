@@ -147,7 +147,11 @@ class DataProcessor {
       band5Distance: _band5Distance,
     );
   }
-
+  // void resetMetrics(){
+  //   _totalDistance = 0.0;
+  //   _band4Distance = 0.0;
+  //   _band5Distance = 0.0;
+  // }
 }
 
 /// Só para agrupar o resultado do processamento de um único pacote

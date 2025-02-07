@@ -1,5 +1,4 @@
 import 'package:atletec/provider/manager.dart';
-import 'package:atletec/widgets/header_widget.dart';
 import 'package:atletec/widgets/serial_data_plotter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +31,7 @@ class Dashboardwidget extends StatelessWidget {
               ),
             ]),
           )
-        : SerialDataPlotter();
+        : const SerialDataPlotter();
         // Column(
         //     children: [
         //       Container(

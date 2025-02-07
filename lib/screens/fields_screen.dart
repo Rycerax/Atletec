@@ -151,7 +151,7 @@ class FieldsScreen extends StatelessWidget {
         content: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 width: 240,
                 child: TextField(
                   controller: nameController,

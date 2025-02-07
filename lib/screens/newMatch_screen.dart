@@ -4,6 +4,8 @@ import '../provider/manager.dart';
 import '../model/match.dart';
 
 class NewmatchScreen extends StatefulWidget {
+  const NewmatchScreen({super.key});
+
   @override
   _NewmatchScreenState createState() => _NewmatchScreenState();
 }
@@ -38,14 +40,14 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
       content: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
+            SizedBox(
               width: 240,
               child: TextField(
                 controller: nameController,
                 decoration: const InputDecoration(labelText: 'Nome'),
               ),
             ),
-            Container(
+            SizedBox(
               width: 240,
               child: TextField(
                 controller: descriptionController,

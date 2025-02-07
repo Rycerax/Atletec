@@ -1,5 +1,4 @@
 import 'package:atletec/data/side_menu_data.dart';
-import 'package:atletec/provider/data_processor.dart';
 import 'package:atletec/screens/config_screen.dart';
 import 'package:atletec/screens/history_screen.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +55,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
         child: const Row(
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 7),
               child: Icon(
                 Icons.arrow_back,
                 color: Colors.grey,

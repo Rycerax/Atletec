@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:hive/hive.dart';
 import 'package:atletec/model/player.dart';
 import 'package:atletec/model/field.dart';

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
 import 'package:atletec/provider/manager.dart';
 import 'package:atletec/widgets/header_widget.dart';
@@ -202,7 +201,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   }
 
   void _startListening(BuildContext context, Manager st) async {
-    _timer = Timer.periodic(Duration(seconds: 1), (Timer timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       setState(() {
         _secondsElapsed++;
       });
@@ -336,7 +335,7 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
         padding: const EdgeInsets.only(top: 20),
         child: Column(
           children: [
-            HeaderWidget(),
+            const HeaderWidget(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
