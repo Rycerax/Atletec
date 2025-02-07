@@ -287,4 +287,13 @@ class Manager with ChangeNotifier {
     notifyListeners();
   }
 
+  void resetMetrics(){
+    for(final metric in _metrics){
+      metric.history.clear();
+      metric.lastValue = 0.0;
+      metric.previousValue = 0.0;
+    }
+    notifyListeners();
+  }
+
 }

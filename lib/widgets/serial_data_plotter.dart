@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:atletec/provider/manager.dart';
-import 'package:atletec/model/metricModel.dart';
 import 'package:atletec/widgets/header_widget.dart';
 import 'package:atletec/widgets/metricsScreen.dart';
 import 'package:csv/csv.dart';
@@ -45,7 +44,6 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
   Image? previewImage;
   int imgKey = 0;
   int _secondsElapsed = 0;
-  bool _isRunning = false;
   String filePath = '';
   File file = File('');
   ValueNotifier<int> imgKeyNotifier = ValueNotifier(0); // Gerencia atualizações de imagem
@@ -55,15 +53,15 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     super.initState();
     setNewCoordinates();
     Provider.of<Manager>(context, listen: false).updateFunc("Metrics");
-    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
-      setState(() {
-        imageCache.clear();
-        imageCache.clearLiveImages();
-        imgKey ^= 1;
-      });
-    });
+    // _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+    //   setState(() {
+    //     imageCache.clear();
+    //     imageCache.clearLiveImages();
+    //     imgKey ^= 1;
+    //   });
+    // });
     imgFile = File('./lib/images/heatmap.png');
-    previewImage = Image.file(imgFile!);
+    // previewImage = Image.file(imgFile!);
     setState(() {
       imageCache.clear();
       imageCache.clearLiveImages();
@@ -177,10 +175,11 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
 
     if (res.statusCode == 200) {
       setState(() {
-        // imageCache.clear();
-        // imageCache.clearLiveImages();
-        // imgKey ^= 1;
-        imgFile = File('./lib/images/heatmap.png');
+        imageCache.clear();
+        imageCache.clearLiveImages();
+        imgKey ^= 1;
+        // imgFile = File('./lib/images/heatmap.png');
+        // previewImage = Image.file(imgFile!);
       });
       imgKeyNotifier.value++; // Incrementa o valor para atualizar a imagem
     }
@@ -380,7 +379,9 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               ? const MetricsScreen()
               : Center(
                   child: imgFile == null
-                    ? const Placeholder()
+                    ? const SizedBox(
+                      height: double.infinity,
+                    )
                     : AspectRatio(
                         aspectRatio: 2, // Adjust this aspect ratio to match your image's ratio
                         child: FittedBox(

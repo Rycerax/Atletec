@@ -1,4 +1,5 @@
 import 'package:atletec/data/side_menu_data.dart';
+import 'package:atletec/provider/data_processor.dart';
 import 'package:atletec/screens/config_screen.dart';
 import 'package:atletec/screens/history_screen.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class _SideMenuWidgetState extends State<SideMenuWidget> {
           manager.updatedIsMatch(false);
           manager.updateBattery(0);
           manager.updateGPS(false);
+          manager.resetMetrics();
         }
         ,
         child: const Row(

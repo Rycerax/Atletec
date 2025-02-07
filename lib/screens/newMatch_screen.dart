@@ -119,7 +119,6 @@ class _NewmatchScreenState extends State<NewmatchScreen> {
           onPressed: () {
             if (nameController.text.isNotEmpty &&
                 descriptionController.text.isNotEmpty &&
-                selectedSport != "" &&
                 manager.selectedField != null &&
                 manager.selectedPlayer != null) {
               String dataString = "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}";
