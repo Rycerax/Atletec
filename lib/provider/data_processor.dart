@@ -49,6 +49,14 @@ class DataProcessor {
   /// Distância percorrida na faixa 5
   double get band5Distance => _band5Distance;
 
+  void resetProcessorMetrics(){
+    this._band4Distance = 0;
+    this._band5Distance = 0;
+    this._lastVelocityMS = 0;
+    this._totalDistance = 0;
+    this._lastPacket = DataPacket(timestamp: DateTime.now(), xg: 0, yg: 0, zg: 0, xa: 0, ya: 0, za: 0, latitude: 0, longitude: 0);
+  }
+
   double _deg2rad(double deg){
     return deg * (math.pi / 180.0);
   }

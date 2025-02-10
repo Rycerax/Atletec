@@ -287,11 +287,15 @@ class Manager with ChangeNotifier {
   }
 
   void resetMetrics(){
-    for(final metric in _metrics){
-      metric.history.clear();
-      metric.lastValue = 0.0;
-      metric.previousValue = 0.0;
-    }
+    // for(final metric in _metrics){
+    //   metric.history.clear();
+    //   metric.lastValue = 0.0;
+    //   metric.previousValue = 0.0;
+    // }
+    _metrics.clear();
+    _addDefaultMetrics();
+    _processor.resetProcessorMetrics();
+
     notifyListeners();
   }
 
