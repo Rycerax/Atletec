@@ -84,9 +84,10 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
     }
     filePath = path;
     file = await File('$filePath/dados${Provider.of<Manager>(context, listen: false).selectedMatch!.id}.csv').create();
-    writeData(['time', 'velocityKMH', 'velocityMS', 'accelerationMS2', 'totalDistance', 'band4Distance', 'band5Distance']);
+    // writeData(['time', 'velocityKMH', 'velocityMS', 'accelerationMS2', 'totalDistance', 'band4Distance', 'band5Distance', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long']);
 
-    // writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long']);
+    writeData(['time', 'xg', 'yg', 'zg', 'xa', 'ya', 'za', 'lat', 'long']);
+
     return path;
   }
 
@@ -296,8 +297,8 @@ class _SerialDataPlotterState extends State<SerialDataPlotter> {
               longitude: _bytesToDouble(longBytes)), "gps");
               // st.updateAllMetrics(pacote_atual, "gps");
               // writeData([pacote_atual.timestamp, pacote_atual.xg, pacote_atual.yg, pacote_atual.zg, pacote_atual.xa, pacote_atual.ya, pacote_atual.za, pacote_atual.latitude, pacote_atual.longitude]);
-              writeData([pacote_atual.timestamp, st.metricsPack.velocityKMH, st.metricsPack.velocityMS, st.metricsPack.accelerationMS2, st.metricsPack.totalDistance, st.metricsPack.band4Distance, st.metricsPack.band5Distance]);
-              // writeData([DateTime.now(), 'ND', 'ND', 'ND', 'ND', 'ND', 'ND', pacote_atual.latitude, pacote_atual.longitude]);
+              // writeData([pacote_atual.timestamp, st.metricsPack.velocityKMH, st.metricsPack.velocityMS, st.metricsPack.accelerationMS2, st.metricsPack.totalDistance, st.metricsPack.band4Distance, st.metricsPack.band5Distance, pacote_atual.xg, pacote_atual.yg, pacote_atual.zg, pacote_atual.xa, pacote_atual.ya, pacote_atual.za, _bytesToDouble(latBytes), _bytesToDouble(longBytes)]);
+              writeData([DateTime.now(), pacote_atual.xg, pacote_atual.yg, pacote_atual.zg, pacote_atual.xa, pacote_atual.ya, pacote_atual.za, pacote_atual.latitude, pacote_atual.longitude]);
               _saveCoordinates(_bytesToDouble(latBytes), _bytesToDouble(longBytes));
               print(_bytesToDouble(latBytes));
               print(_bytesToDouble(longBytes));

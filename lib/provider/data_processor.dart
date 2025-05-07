@@ -68,8 +68,8 @@ class DataProcessor {
     const R = 6371000.0; // raio da terra em metros
     double dLat = _deg2rad(lat2 - lat1);
     double dLon = _deg2rad(lon2 - lon1);
-    print(dLat);
-    print(dLon);
+    // print(dLat);
+    // print(dLon);
     double a = math.sin(dLat / 2) * math.sin(dLat / 2)
       + math.cos(_deg2rad(lat1)) * math.cos(_deg2rad(lat2)) 
       * math.sin(dLon / 2) * math.sin(dLon / 2);
@@ -90,9 +90,9 @@ class DataProcessor {
     // print("Distância : ${dist}");
     // Filtrar outliers
     if (dist > 100.0) {
-      dist = 0.0; // descarta como fazia no Python
+      dist = 0.0;
       dt = 0;
-    } else if(dist<1.5){
+    } else if(dist<0.5){
       return PacketResult(
         velocityMS: 0,
         velocityKMH: 0,
